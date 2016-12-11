@@ -1,0 +1,202 @@
+html,
+body {
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 30px;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.headers {
+    font-size: 25px;
+    font-weight: 300;
+    position: fixed;
+    width: 100px;
+    margin: 0;
+    margin-top: 30px;
+    margin-left: 30px;
+    padding: 0;
+    text-align: center;
+}
+
+.name,
+.about,
+.interests,
+.contact {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    padding-right: 200px;
+    padding-left: 200px;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    -webkit-box-flex: 1;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+}
+
+body > div:nth-child(even) {
+    color: #2196f3;
+    background: #fafafa;
+}
+
+body > div:nth-child(odd) {
+    color: #fafafa;
+    background: #2196f3;
+}
+
+.name h1 {
+    text-align: center;
+}
+
+.contact {
+    flex-direction: row;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: row;
+}
+
+.about .description {
+    font-weight: bold;
+    line-height: 40px;
+    text-align: center;
+}
+
+.interests {
+    flex-direction: row;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: row;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -ms-flex-line-pack: center;
+    align-content: center;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+
+.interests p {
+    font-size: 23px;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-left: 30px;
+    padding: 5px;
+    text-align: center;
+}
+
+
+/* .interests .tags {
+    max-height: 100%;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    text-align: center;
+}
+
+.interests li {
+    font-size: 23px;
+    font-weight: bold;
+    display: inline-block;
+    margin-top: 10px;
+    margin-left: 10px;
+    padding: 5px;
+    text-align: center;
+    color: #2196f3;
+} */
+
+.timeline {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    padding-right: 120px;
+    padding-left: 120px;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+}
+
+.timeline .timedot {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: row;
+}
+
+.timeline .event-name {
+    font-weight: bold;
+    height: 100%;
+    margin-bottom: 40px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.timeline .circles {
+    width: 30px;
+    height: 30px;
+    -webkit-transition: all ease .8s;
+    transition: all ease .8s;
+    border: 2px solid #fafafa;
+    border-radius: 50%;
+    background: #fafafa;
+    -ms-flex-negative: 1;
+    flex-shrink: 1;
+}
+
+.timeline .circles:hover {
+    border: 2px solid #2196f3;
+}
+
+.timeline .lines {
+    z-index: 100;
+    width: 60px;
+    height: 5px;
+    margin-right: -5px;
+    margin-left: -5px;
+    background: #fafafa;
+}
+
+.contact a {
+    display: inline-block;
+    margin-top: 10px;
+    margin-right: 4px;
+    padding: 5px;
+    text-decoration: none;
+    color: #2196f3;
+}
+
+.contact a:last-child {
+    margin-right: 0;
+}

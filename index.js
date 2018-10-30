@@ -22,6 +22,9 @@ const events = [{
 }, {
     content: 'Joined PayPal Inc',
     date: 'July 2015'
+}, {
+    content: 'Joined Helpshift Inc',
+    date: 'September 2018'
 }];
 
 const circles$ = Rx.Observable.merge(

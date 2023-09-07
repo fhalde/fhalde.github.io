@@ -1,5 +1,5 @@
 ---
-title: "METADATA"
+title: "META"
 date: 2023-08-18T16:23:02+02:00
 draft: true
 ---

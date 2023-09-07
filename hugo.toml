@@ -32,7 +32,7 @@ headTitle = "Faiz Halde"
 Description = 'Takeaways'
 mainSections = ["posts"]
 [[params.socials]]
-name = "METADATA"
+name = "META"
 link = "/posts/metadata"
 [[params.socials]]
 name = "GITHUB"

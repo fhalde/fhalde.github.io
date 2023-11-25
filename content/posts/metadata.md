@@ -1,7 +1,6 @@
 ---
 title: "META"
 date: 2023-08-18T16:23:02+02:00
-draft: true
 ---
 Hi, I'm **Faiz Halde**. I'm a software engineer for almost a decade now. That's right, saying "10 years" just doesn't pack the same punch, folks. 
 

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Faiz Halde</title>
+    <link>https://fhalde.github.io/posts/</link>
+    <description>Recent content in Posts on Faiz Halde</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 18 Aug 2023 16:23:02 +0200</lastBuildDate><atom:link href="https://fhalde.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>META</title>
+      <link>https://fhalde.github.io/posts/metadata/</link>
+      <pubDate>Fri, 18 Aug 2023 16:23:02 +0200</pubDate>
+      
+      <guid>https://fhalde.github.io/posts/metadata/</guid>
+      <description>Hi, I&amp;rsquo;m Faiz Halde. I&amp;rsquo;m a software engineer for almost a decade now. That&amp;rsquo;s right, saying &amp;ldquo;10 years&amp;rdquo; just doesn&amp;rsquo;t pack the same punch, folks.
+I work for @nubank, I&amp;rsquo;ve also worked for Paypal &amp;amp; Helpshift
+I have a deep interest in Distributed Systems, Databases, System Performance &amp;amp; in recent times with all facets of devops &amp;amp; big-data.
+I don&amp;rsquo;t discriminate programming languages however Clojure, Scala, Golang &amp;amp; Java are my current beloved.</description>
+    </item>
+    
+  </channel>
+</rss>

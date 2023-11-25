@@ -1,0 +1,167 @@
+diff --git a/assets/css/index.css b/assets/css/index.css
+index 4bd2843..a3b3e61 100644
+--- a/assets/css/index.css
++++ b/assets/css/index.css
+@@ -1,7 +1,15 @@
+ /* global */
+ 
++@import url('https://fonts.googleapis.com/css2?family=Merriweather&family=Mukta&family=Quicksand&family=Roboto:wght@100&display=swap');
++@import url('https://fonts.googleapis.com/css2?family=Merriweather&family=Mukta&family=Noto+Sans+Mahajani&family=Quicksand&family=Roboto:wght@100;400&display=swap');
++@import url('https://fonts.googleapis.com/css2?family=Abel&family=Merriweather&family=Quicksand&family=Roboto:wght@100;400&display=swap');
++@import url('https://fonts.googleapis.com/css2?family=Abel&family=Merriweather&family=Open+Sans&family=Quicksand&family=Roboto:wght@100;400&display=swap');
++@import url('https://fonts.googleapis.com/css2?family=Abel&family=Merriweather&family=Open+Sans&family=Quicksand&family=Roboto:wght@100;400&family=Ubuntu+Mono&display=swap');
++@import url('https://fonts.googleapis.com/css2?family=Abel&family=Inconsolata&family=Merriweather&family=Open+Sans&family=Quicksand&family=Roboto:wght@100;400&family=Ubuntu+Mono&display=swap');
++@import url('https://fonts.googleapis.com/css2?family=Abel&family=Inconsolata:wght@700&family=Merriweather&family=Open+Sans&family=Quicksand&family=Roboto:wght@100;400&family=Ubuntu+Mono&display=swap');
++
+ body {
+-  font-family: "Bree Serif", sans-serif;
++  font-family: 'Open Sans', sans-serif;
+   -webkit-font-smoothing: antialiased;
+   margin: 0 20px;
+ }
+@@ -46,7 +54,6 @@ a:hover {
+ .markdown-body pre {
+   padding: 16px;
+   overflow: auto;
+-  border-radius: 10px;
+ }
+ 
+ .markdown-body code {
+@@ -74,20 +81,25 @@ a:hover {
+ /* header */
+ 
+ .site-date-catalog {
+-  font-size: 2rem;
++  -webkit-font-smoothing: antialiased;
++  font-weight: 700;
++  font-family: 'Inconsolata', monospace;
++  font-size: 1.5rem;
+ }
+ 
+ .header-title {
+-  font-size: 2rem;
++  font-size: 3rem;
+   font-weight: bold;
+   margin-top: 32px;
+   font-family: "Bungee Shade", sans-serif;
+ }
+ .header-title a {
+   text-decoration: none;
++  color: #db222a !important;
+ }
+ 
+ .header-subtitle {
++  font-size: 1.4rem;
+   color: #666;
+ }
+ 
+@@ -179,7 +191,20 @@ a:hover {
+ 
+ .post-date {
+   font-weight: 800;
+-  font-style: italic;
++  -webkit-font-smoothing: antialiased;
++  font-weight: 700;
++  font-size: 1.2rem;
++  text-transform: uppercase;
++  font-family: 'Inconsolata', monospace;
++}
++
++.posts-line > .posts-date {
++  -webkit-font-smoothing: antialiased;
++  font-weight: 700;
++  font-size: 1rem;
++  margin: auto;
++  text-transform: uppercase;
++  font-family: 'Inconsolata', monospace;
+ }
+ 
+ .post-author {
+@@ -280,3 +305,20 @@ a:hover {
+     display: none;
+   }
+ }
++
++.post-title:after {
++  content: "";
++  margin-top: 20px;
++  border-bottom: 3px solid #db222a;
++  width: 12%;
++  display: block;
++}
++
++span.underline {
++ padding-bottom: 2px;
++ border-bottom: 0.100em dashed #db222a;
++}
++
++span.highlight {
++ color: #db222a;
++}
+diff --git a/layouts/_default/_markup/render-link.html b/layouts/_default/_markup/render-link.html
+new file mode 100644
+index 0000000..eb8714d
+--- /dev/null
++++ b/layouts/_default/_markup/render-link.html
+@@ -0,0 +1 @@
++<a href="{{ .Destination | safeURL }}"{{ with .Title}} title="{{ . }}"{{ end }}{{ if or (strings.HasPrefix .Destination "http") (strings.HasPrefix .Destination "https") }} target="_blank"{{ end }} >{{ .Text | safeHTML }}</a>
+diff --git a/layouts/_default/single.html b/layouts/_default/single.html
+index 815a0d4..1116ed4 100644
+--- a/layouts/_default/single.html
++++ b/layouts/_default/single.html
+@@ -21,11 +21,6 @@
+               {{ end }}
+             </div>
+             <div class="col-xs-6">
+-              {{ if .Site.Author.name }}
+-              <div class="post-author">
+-                <a target="_blank" href="{{ .Site.Author.homepage }}">@{{ .Site.Author.name }}</a>
+-              </div>
+-              {{ end }}
+             </div>
+           </div>
+           {{ end }}
+@@ -80,4 +75,4 @@
+ 
+ </body>
+ 
+-</html>
+\ No newline at end of file
++</html>
+diff --git a/layouts/index.html b/layouts/index.html
+index 8ee2927..baa72a6 100644
+--- a/layouts/index.html
++++ b/layouts/index.html
+@@ -45,4 +45,4 @@
+   {{ partial "scripts.html" . }}
+ </body>
+ 
+-</html>
+\ No newline at end of file
++</html>
+diff --git a/layouts/partials/head.html b/layouts/partials/head.html
+index d1083a1..dccae8e 100644
+--- a/layouts/partials/head.html
++++ b/layouts/partials/head.html
+@@ -57,6 +57,9 @@
+   <!-- fonts -->
+   <link rel="preconnect" href="https://fonts.gstatic.com">
+   <link href="https://fonts.googleapis.com/css?family=Bree+Serif|Bungee+Shade" rel="stylesheet">
++  <link rel="preconnect" href="https://fonts.googleapis.com">
++  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
++  <link href="https://fonts.googleapis.com/css2?family=Quicksand&display=swap" rel="stylesheet">
+   <!-- quicklink require -->
+   <!-- <script>
+     /* Disable minification (remove `.min` from URL path) for more info 
+diff --git a/theme.toml b/theme.toml
+index 8d32030..9ecb05e 100644
+--- a/theme.toml
++++ b/theme.toml
+@@ -21,5 +21,5 @@ staticPrefix = ""
+ extraCSSFiles = []
+ 
+ [author]
+-  name = "Joway Wang"
+-  homepage = "https://joway.io"
++  name = "Faiz Halde"
++  homepage = "https://github.com/fhalde"

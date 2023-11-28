@@ -215,7 +215,7 @@ a:hover {
 }
 
 .post-content p {
-  hyphens: auto;
+  hyphens: none;
   line-height: 1.8;
   /* text-align: justify; */
   text-justify: ideographic;

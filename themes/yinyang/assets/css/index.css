@@ -1,12 +1,6 @@
 /* global */
 
-@import url('https://fonts.googleapis.com/css2?family=Merriweather&family=Mukta&family=Quicksand&family=Roboto:wght@100&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Merriweather&family=Mukta&family=Noto+Sans+Mahajani&family=Quicksand&family=Roboto:wght@100;400&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Abel&family=Merriweather&family=Quicksand&family=Roboto:wght@100;400&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Abel&family=Merriweather&family=Open+Sans&family=Quicksand&family=Roboto:wght@100;400&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Abel&family=Merriweather&family=Open+Sans&family=Quicksand&family=Roboto:wght@100;400&family=Ubuntu+Mono&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Abel&family=Inconsolata&family=Merriweather&family=Open+Sans&family=Quicksand&family=Roboto:wght@100;400&family=Ubuntu+Mono&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Abel&family=Inconsolata:wght@700&family=Merriweather&family=Open+Sans&family=Quicksand&family=Roboto:wght@100;400&family=Ubuntu+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@700&family=Open+Sans&display=swap');
 
 body {
   font-family: 'Open Sans', sans-serif;

@@ -2,9 +2,9 @@
 title: "META"
 date: 2023-08-18T16:23:02+02:00
 ---
-Hi, I'm **Faiz Halde**. I'm a software engineer for almost a decade now. That's right, saying "10 years" just doesn't pack the same punch, folks. 
+Hi, I'm **Faiz Halde**. I'm a software engineer for almost a decade now. That's right, saying "10 years" just doesn't pack the same punch, folks.
 
-I work for **@nubank**, I've also worked for Paypal & Helpshift
+I work for **@Aleph-Alpha**, I've also worked for Nubank, Paypal & Helpshift
 
 I have a deep interest in <span class="underline">Distributed Systems</span>, <span class="underline">Databases</span>, <span class="underline">System Performance</span> & in recent times with all facets of devops & big-data.
 
@@ -23,7 +23,5 @@ That being said, I have also worked with,
 - MongoDB
 - Bash scripting
 
-
-
-
+---
 Visit the [Hugo](https://gohugo.io) website!

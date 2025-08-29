@@ -4,7 +4,7 @@
 
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="author" content="{{ .Site.Author.name }}" />
+  <meta name="author" content="{{ .Site.Params.Author.name }}" />
   <meta property="og:url" content="{{ .Permalink }}" />
   <link rel="canonical" href="{{ .Permalink }}" />
 
@@ -62,7 +62,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Quicksand&display=swap" rel="stylesheet">
   <!-- quicklink require -->
   <!-- <script>
-    /* Disable minification (remove `.min` from URL path) for more info 
+    /* Disable minification (remove `.min` from URL path) for more info
     https://polyfill.io/v2/polyfill.min.js?features=IntersectionObserver
     */
     (function (undefined) { }).call('object' === typeof window && window || 'object' === typeof self && self || 'object' === typeof global && global || {});

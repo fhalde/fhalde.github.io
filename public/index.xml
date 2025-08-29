@@ -2,22 +2,25 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Faiz Halde</title>
-    <link>https://fhalde.github.io/</link>
+    <link>http://localhost:1313/</link>
     <description>Recent content on Faiz Halde</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 18 Aug 2023 16:23:02 +0200</lastBuildDate><atom:link href="https://fhalde.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 01 Aug 2025 16:23:02 +0200</lastBuildDate>
+    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Fallacies of AI</title>
+      <link>http://localhost:1313/posts/fallacies/</link>
+      <pubDate>Fri, 01 Aug 2025 16:23:02 +0200</pubDate>
+      <guid>http://localhost:1313/posts/fallacies/</guid>
+      <description>&lt;h1 id=&#34;the-fallacies-of-llms&#34;&gt;The Fallacies of LLMs&lt;/h1&gt;&#xA;&lt;p&gt;Inspired by &lt;em&gt;&lt;strong&gt;The Fallacies of Distributed Computing&lt;/strong&gt;&lt;/em&gt;, here are some common misconceptions about Large Language Models&lt;/p&gt;&#xA;&lt;hr&gt;&#xA;&lt;h3 id=&#34;1-the-model-knows-facts&#34;&gt;1. The model knows facts.&lt;/h3&gt;&#xA;&lt;p&gt;LLMs don&amp;rsquo;t &amp;ldquo;know&amp;rdquo; – they generate plausible text based on training patterns. It might produce correct answers, but correctness is not guaranteed.&lt;/p&gt;&#xA;&lt;h3 id=&#34;2-bigger-models-always-mean-better-results&#34;&gt;2. Bigger models always mean better results.&lt;/h3&gt;&#xA;&lt;p&gt;Scale helps, but alignment, fine-tuning, prompting, and context management matter just as much.&lt;/p&gt;&#xA;&lt;h3 id=&#34;3-the-ai-knows-when-its-wrong&#34;&gt;3. The AI knows when it&amp;rsquo;s wrong.&lt;/h3&gt;&#xA;&lt;p&gt;Most AI systems are poorly calibrated, often overconfident in incorrect predictions.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>META</title>
-      <link>https://fhalde.github.io/posts/metadata/</link>
+      <link>http://localhost:1313/posts/metadata/</link>
       <pubDate>Fri, 18 Aug 2023 16:23:02 +0200</pubDate>
-      
-      <guid>https://fhalde.github.io/posts/metadata/</guid>
-      <description>Hi, I&amp;rsquo;m Faiz Halde. I&amp;rsquo;m a software engineer for almost a decade now. That&amp;rsquo;s right, saying &amp;ldquo;10 years&amp;rdquo; just doesn&amp;rsquo;t pack the same punch, folks.
-I work for @nubank, I&amp;rsquo;ve also worked for Paypal &amp;amp; Helpshift
-I have a deep interest in Distributed Systems, Databases, System Performance &amp;amp; in recent times with all facets of devops &amp;amp; big-data.
-I don&amp;rsquo;t discriminate programming languages however Clojure, Scala, Golang &amp;amp; Java are my current beloved.</description>
+      <guid>http://localhost:1313/posts/metadata/</guid>
+      <description>&lt;p&gt;Hi, I&amp;rsquo;m &lt;strong&gt;Faiz Halde&lt;/strong&gt;. I&amp;rsquo;m a software engineer for almost a decade now. That&amp;rsquo;s right, saying &amp;ldquo;10 years&amp;rdquo; just doesn&amp;rsquo;t pack the same punch, folks.&lt;/p&gt;&#xA;&lt;p&gt;I work for &lt;strong&gt;@Aleph-Alpha&lt;/strong&gt;, I&amp;rsquo;ve also worked for Nubank, Paypal &amp;amp; Helpshift&lt;/p&gt;&#xA;&lt;p&gt;I have a deep interest in &lt;span class=&#34;underline&#34;&gt;Distributed Systems&lt;/span&gt;, &lt;span class=&#34;underline&#34;&gt;Databases&lt;/span&gt;, &lt;span class=&#34;underline&#34;&gt;System Performance&lt;/span&gt; &amp;amp; in recent times with all facets of devops &amp;amp; big-data.&lt;/p&gt;&#xA;&lt;p&gt;I don&amp;rsquo;t discriminate programming languages however &lt;span class=&#34;underline&#34;&gt;Clojure&lt;/span&gt;, Scala, &lt;span class=&#34;underline&#34;&gt;Golang&lt;/span&gt; &amp;amp; Java are my current beloved.&lt;/p&gt;&#xA;&lt;p&gt;That being said, I have also worked with,&lt;/p&gt;</description>
     </item>
-    
   </channel>
 </rss>

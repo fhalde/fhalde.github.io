@@ -1,5 +1,5 @@
 ---
-title: "Fallacies of AI"
+title: "The Fallacies of LLMs"
 date: 2025-08-01T16:23:02+02:00
 ---
 

@@ -1,8 +1,8 @@
 ---
-title: "The Fallacies of LLMs"
+title: "Fallacies of LLMs"
 date: 2025-08-01T16:23:02+02:00
 ---
-Inspired by ***The Fallacies of Distributed Computing***, here are some common misconceptions about Large Language Models
+Inspired by the ***Fallacies of Distributed Computing***, here are some common misconceptions about Large Language Models
 
 ---
 

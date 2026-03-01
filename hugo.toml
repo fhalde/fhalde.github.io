@@ -20,7 +20,7 @@ theme = 'yinyang'
     lineNumbersInTable = true
     noClasses = true
     noHl = false
-    style = 'vim'
+    style = 'github-dark'
     tabWidth = 4
 
 [author]

@@ -6,21 +6,21 @@
     <description>Recent content in Posts on Faiz Halde</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 01 Aug 2025 16:23:02 +0200</lastBuildDate>
+    <lastBuildDate>Sun, 01 Mar 2026 22:05:50 +0100</lastBuildDate>
     <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Fallacies of AI</title>
-      <link>http://localhost:1313/posts/fallacies/</link>
-      <pubDate>Fri, 01 Aug 2025 16:23:02 +0200</pubDate>
-      <guid>http://localhost:1313/posts/fallacies/</guid>
-      <description>&lt;h1 id=&#34;the-fallacies-of-llms&#34;&gt;The Fallacies of LLMs&lt;/h1&gt;&#xA;&lt;p&gt;Inspired by &lt;em&gt;The Fallacies of Distributed Computing&lt;/em&gt;, here are common misconceptions about Large Language Models (LLMs):&lt;/p&gt;&#xA;&lt;hr&gt;&#xA;&lt;h3 id=&#34;1-the-model-knows-facts&#34;&gt;1. The model knows facts.&lt;/h3&gt;&#xA;&lt;p&gt;LLMs don’t “know” — they generate plausible text based on training patterns. Correctness is not guaranteed.&lt;/p&gt;&#xA;&lt;h3 id=&#34;2-bigger-models-always-mean-better-results&#34;&gt;2. Bigger models always mean better results.&lt;/h3&gt;&#xA;&lt;p&gt;Scale helps, but alignment, fine-tuning, prompting, and context management matter just as much.&lt;/p&gt;&#xA;&lt;h3 id=&#34;3-the-model-understands-like-a-human&#34;&gt;3. The model understands like a human.&lt;/h3&gt;&#xA;&lt;p&gt;LLMs simulate reasoning through prediction, not genuine comprehension or intention.&lt;/p&gt;</description>
+      <title>Making JSON Awaitable</title>
+      <link>http://localhost:1313/posts/jsontap/</link>
+      <pubDate>Sun, 01 Mar 2026 22:05:50 +0100</pubDate>
+      <guid>http://localhost:1313/posts/jsontap/</guid>
+      <description>&lt;p&gt;When working with LLMs for building Agentic Apps, one thing quickly becomes obvious:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;You want structured outputs.&lt;/li&gt;&#xA;&lt;li&gt;The model streams tokens.&lt;/li&gt;&#xA;&lt;li&gt;Your code waits for a finished JSON blob.&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;That mismatch introduces accumulated latency.&lt;/p&gt;&#xA;&lt;p&gt;I built &lt;a href=&#34;https://github.com/fhalde/jsontap&#34; target=&#34;_blank&#34; &gt;jsontap&lt;/a&gt;&#xA; to close that gap.&lt;/p&gt;&#xA;&lt;p&gt;The idea is simple:&lt;/p&gt;&#xA;&lt;blockquote&gt;&#xA;&lt;p&gt;Treat JSON as a tree of promises.&#xA;Any path in that tree can be awaited, even before the full JSON has been generated.&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;This post explains the design behind that idea.&lt;/p&gt;</description>
     </item>
     <item>
       <title>META</title>
       <link>http://localhost:1313/posts/metadata/</link>
       <pubDate>Fri, 18 Aug 2023 16:23:02 +0200</pubDate>
       <guid>http://localhost:1313/posts/metadata/</guid>
-      <description>&lt;p&gt;Hi, I&amp;rsquo;m &lt;strong&gt;Faiz Halde&lt;/strong&gt;. I&amp;rsquo;m a software engineer for almost a decade now. That&amp;rsquo;s right, saying &amp;ldquo;10 years&amp;rdquo; just doesn&amp;rsquo;t pack the same punch, folks.&lt;/p&gt;&#xA;&lt;p&gt;I work for &lt;strong&gt;@Aleph-Alpha&lt;/strong&gt;, I&amp;rsquo;ve also worked for Nubank, Paypal &amp;amp; Helpshift&lt;/p&gt;&#xA;&lt;p&gt;I have a deep interest in &lt;span class=&#34;underline&#34;&gt;Distributed Systems&lt;/span&gt;, &lt;span class=&#34;underline&#34;&gt;Databases&lt;/span&gt;, &lt;span class=&#34;underline&#34;&gt;System Performance&lt;/span&gt; &amp;amp; in recent times with all facets of devops &amp;amp; big-data.&lt;/p&gt;&#xA;&lt;p&gt;I don&amp;rsquo;t discriminate programming languages however &lt;span class=&#34;underline&#34;&gt;Clojure&lt;/span&gt;, Scala, &lt;span class=&#34;underline&#34;&gt;Golang&lt;/span&gt; &amp;amp; Java are my current beloved.&lt;/p&gt;&#xA;&lt;p&gt;That being said, I have also worked with,&lt;/p&gt;</description>
+      <description>&lt;p&gt;Hi, I&amp;rsquo;m &lt;strong&gt;Faiz Halde&lt;/strong&gt; — a software engineer with 12+ years of experience.&lt;/p&gt;&#xA;&lt;p&gt;I currently work at &lt;strong&gt;Aleph Alpha&lt;/strong&gt;, building AI applications. Previously, I&amp;rsquo;ve worked at Nubank, PayPal, and Helpshift.&lt;/p&gt;&#xA;&lt;p&gt;My main interests are Distributed Systems, Databases, System Performance and Big Data.&lt;/p&gt;&#xA;&lt;p&gt;I enjoy working across languages, especially Clojure, Python, Scala &amp;amp; Go.&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

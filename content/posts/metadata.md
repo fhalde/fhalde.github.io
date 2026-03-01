@@ -8,4 +8,4 @@ I currently work at **Aleph Alpha**, building AI applications. Previously, I've 
 
 My main interests are Distributed Systems, Databases, System Performance and Big Data.
 
-I enjoy working across languages, especially Clojure, Python, Scala, Go.
+I enjoy working across languages, especially Clojure, Python, Scala & Go.

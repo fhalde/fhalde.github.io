@@ -1,9 +1,7 @@
 /* global */
 
-@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@700&family=Open+Sans&display=swap');
-
 body {
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Source Serif 4", "Iowan Old Style", "Palatino", "Times New Roman", serif;
   -webkit-font-smoothing: antialiased;
   margin: 0 20px;
 }
@@ -51,6 +49,7 @@ a:hover {
 }
 
 .markdown-body code {
+  font-family: "IBM Plex Mono", "SF Mono", Menlo, Monaco, "Courier New", monospace;
   padding: 0.2em 0.4em;
   font-size: 85%;
   background-color: #f6f8fa;
@@ -76,8 +75,8 @@ a:hover {
 
 .site-date-catalog {
   -webkit-font-smoothing: antialiased;
-  font-weight: 700;
-  font-family: 'Inconsolata', monospace;
+  font-weight: 400;
+  font-family: "Inter", -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
   font-size: 1.5rem;
 }
 
@@ -170,6 +169,7 @@ a:hover {
 }
 
 .post-title {
+  font-family: "Inter", -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
   font-size: 2rem;
   font-weight: 600;
 }
@@ -184,24 +184,24 @@ a:hover {
 }
 
 .post-date {
-  font-weight: 800;
   -webkit-font-smoothing: antialiased;
-  font-weight: 700;
+  font-weight: 400;
   font-size: 1.2rem;
   text-transform: uppercase;
-  font-family: 'Inconsolata', monospace;
+  font-family: "Inter", -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
 }
 
 .posts-line > .posts-date {
   -webkit-font-smoothing: antialiased;
-  font-weight: 700;
+  font-weight: 400;
   font-size: 1rem;
   margin: auto;
   text-transform: uppercase;
-  font-family: 'Inconsolata', monospace;
+  font-family: "Inter", -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
 }
 
 .post-author {
+  font-family: "Inter", -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
   float: right;
   font-weight: 600;
 }

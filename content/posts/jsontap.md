@@ -10,14 +10,14 @@ When working with LLMs for building Agentic Apps, one thing quickly becomes obvi
 - The model streams tokens.
 - Your code waits for a finished JSON blob.
 
-That mismatch introduces accumulated latency.
+That mismatch accumulates latency.
 
-I built [jsontap](https://github.com/fhalde/jsontap) to close that gap.
+[jsontap](https://github.com/fhalde/jsontap) closes that gap.
 
 The idea is simple:
 
-> Treat JSON as a tree of promises.
-> Any path in that tree can be awaited, even before the full JSON has been generated.
+- Treat JSON as a tree of promises.
+- Any path in that tree can be awaited, even before the full JSON has been generated.
 
 This post explains the design behind that idea.
 
@@ -29,27 +29,40 @@ JSON is not just a string. It is a hierarchical structure.
 {
   "user": {
     "name": "Alice",
-    "scores": [10, 20, 30]
+    "scores": [10, 20, 30],
+    "friends": [
+      {
+        "name": "Bob",
+        "email": "bob@example.com"
+      }
+    ]
   }
 }
 ```
 
-Conceptually, this is a tree:
+As a tree:
 
 ```text
 (root)
  └── user
       ├── name -> "Alice"
-      └── scores
+      ├── scores
            ├── 0 -> 10
            ├── 1 -> 20
            └── 2 -> 30
+      └── friends
+           ├── 0
+              ├── name -> "Bob"
+              └── email -> "bob@example.com"
 ```
 
-Every value in JSON can be addressed by a unique path:
+Every value in JSON can be addressed by a unique path.
 
+- `/user`
 - `/user/name`
 - `/user/scores/1`
+- `/user/friends`
+- `/user/friends/0/name`
 
 Traditional JSON parsing gives you the whole tree at once. Only then can you walk/access it.
 
@@ -70,33 +83,33 @@ With LLMs (or any streaming API), JSON arrives progressively:
 }
 ```
 
-If `"reasoning"` arrives early, why should you wait for `"tool-call"` to finish before using it? Similarly, why wait for the rest of the JSON if `"tool-call"` has already arrived?
+If `"reasoning"` has already materialized in the internal JSON tree, why wait for the rest of the JSON to finish before accessing it?
 
-Standard JSON libraries do not allow this. They require the entire document before giving you access to any node.
+Standard JSON libraries do not allow this. They require the entire JSON to be parsed before giving you access to any node.
 
-That is the core problem jsontap solves.
+That's the core problem jsontap solves, using the iterative JSON parser [ijson](https://github.com/ICRAR/ijson).
 
-## Design Goal: Any Path Can Be Awaited
+## Any Path Can Be Awaited
 
-The core abstraction in jsontap is:
+The core abstraction in jsontap is the `AsyncJsonNode`:
 
 ```python
 from jsontap import jsontap
 
-root = await jsontap(stream)
-# stream: async iterator of JSON text chunks
-reasoning = await root["reasoning"]
+root = jsontap(stream)
+reasoning = root["reasoning"] # returns a AsyncJsonNode
+await reasoning # suspends until the value is resolved
 ```
 
 Even if `"reasoning"` has not been parsed yet, this works.
 
 Under the hood:
 
-- If the value exists, it returns immediately.
-- If it does not exist yet, it suspends until the parser produces it.
+- If the value exists, awaiting it returns immediately.
+- If it does not exist yet, awaiting it suspends on the `AsyncJsonNode` which implements the awaitable protocol.
 - If it never appears, it raises once parsing completes.
 
-This means JSON is no longer just data. It is a reactive tree.
+This means JSON is no longer just data. It is a tree of awaitable nodes.
 
 ## The AsyncJsonNode Wrapper
 
@@ -104,7 +117,7 @@ You cannot return raw values from a node that might not exist yet.
 
 Instead, every node must be a handle, a placeholder that:
 
-- Knows its JSON path
+- Knows its unique path in the JSON tree
 - Knows how to resolve itself
 - Knows how to suspend if needed
 
@@ -129,17 +142,14 @@ That handle:
 - Can be awaited
 - Can be iterated (if it is an array)
 - Can throw if parsing fails
-- Can resolve instantly if already parsed
 
 The wrapper exists because JSON values are not guaranteed to exist yet.
 
-Without it, you would have no way to suspend execution on a path that has not been seen.
+## Everything Is Indexed by Path
 
-## The Core Insight: Everything Is Indexed by Path
+Internally, jsontap does not store a tree in the traditional sense (for simplicity).
 
-Internally, `jsontap` does not store a tree in the traditional sense.
-
-It stores a map from `path -> state`.
+It stores a map from `path -> node state` into a `PathStore`.
 
 Conceptually:
 
@@ -153,17 +163,9 @@ Conceptually:
 }
 ```
 
-This is managed by a central component: `PathStore`.
-
 The path tuple is the identity of every node.
 
-There is no need for parent references or nested objects.
-
-The entire JSON document is flattened into a path-indexed registry.
-
 ## What PathStore Fundamentally Does
-
-`PathStore` is the beating heart of `jsontap`.
 
 ### 1) Storing Node State
 
@@ -180,7 +182,7 @@ It is effectively a reactive dependency graph keyed by JSON paths.
 
 ### 2) Resolving Futures as Data Arrives
 
-When the incremental parser encounters:
+When the incremental parser that jsontap uses [ijson](https://github.com/ICRAR/ijson), encounters:
 
 ```json
 "answer": 42
@@ -198,9 +200,9 @@ If someone previously did:
 await root["answer"]
 ```
 
-`PathStore` already created a `Future` for that path.
+There's a `Future` for that path in the `PathStore` already.
 
-When the value arrives:
+When the value arrives, we resolve the future:
 
 ```python
 future.set_result(42)
@@ -208,7 +210,7 @@ future.set_result(42)
 
 The waiting coroutine resumes immediately.
 
-Access time and parse time are decoupled. That is the whole trick.
+That's it
 
 ### 3) Supporting Progressive Array Iteration
 
@@ -236,37 +238,11 @@ To support this, `PathStore` tracks:
 - Whether the array is closed
 - Iteration cursors waiting for new elements
 
-As each array item is parsed, new node handles become available.
-
-Iterators wake up and continue.
+As each array item is parsed, iterators are woken up.
 
 This enables true progressive consumption of JSON arrays.
 
-## Why This Architecture Works
-
-The key architectural choices are:
-
-- Path-based identity instead of nested object graphs
-- One central store for all state
-- Node wrappers that are pure handles
-- Futures as the synchronization primitive
-
-This keeps the system:
-
-- Deterministic
-- Minimal in shared state
-- Decoupled from parse order
-- Naturally async
-
-There is no complex reactive engine.
-
-Just:
-
-- Paths
-- Futures
-- A streaming parser feeding the store
-
-## The Bigger Idea: JSON as a Promise Tree
+## JSON as a Promise Tree
 
 Normally, JSON is treated as static data.
 
@@ -289,32 +265,23 @@ data = json.loads(response)
 You can write:
 
 ```python
-root = await tap(llm_stream)
+root = await jsontap(llm_stream)
 
-reasoning_task = asyncio.create_task(root["reasoning"])
-answer_task = asyncio.create_task(root["answer"])
-
-reasoning = await reasoning_task
-answer = await answer_task
+reasoning = await root["reasoning"]
+answer = await root["answer"]
 ```
 
-Whichever arrives first resolves first.
+The LLM completion keeps unfolding your code.
 
 ## Closing Thoughts
 
-The design of `jsontap` boils down to one principle:
+The design of jsontap boils down to one principle:
 
-> JSON is a tree.
-> A path identifies a node.
-> A node may not exist yet.
-> Therefore, a node must be awaitable.
+- JSON is a tree.
+- A path identifies a node.
+- A node may not exist yet.
+- Therefore, a node must be awaitable.
 
-Everything else follows from that.
+jsontap is the front-end for ijson.
 
-`AsyncJsonNode` exists because nodes are promises.
-`PathStore` exists because promises must resolve somewhere.
-Paths exist because trees need stable identities.
-
-Once you see JSON this way, streaming stops feeling awkward.
-
-It starts feeling natural.
+Enjoy!

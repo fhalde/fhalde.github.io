@@ -2,26 +2,10 @@
 title: "META"
 date: 2023-08-18T16:23:02+02:00
 ---
-Hi, I'm **Faiz Halde**. I'm a software engineer for almost a decade now. That's right, saying "10 years" just doesn't pack the same punch, folks.
+Hi, I'm **Faiz Halde** — a software engineer with 12+ years of experience.
 
-I work for **@Aleph-Alpha**, I've also worked for Nubank, Paypal & Helpshift
+I currently work at **Aleph Alpha**, building AI applications. Previously, I've worked at Nubank, PayPal, and Helpshift.
 
-I have a deep interest in <span class="underline">Distributed Systems</span>, <span class="underline">Databases</span>, <span class="underline">System Performance</span> & in recent times with all facets of devops & big-data.
+My main interests are Distributed Systems, Databases, System Performance and Big Data.
 
-I don't discriminate programming languages however <span class="underline">Clojure</span>, Scala, <span class="underline">Golang</span> & Java are my current beloved.
-
-That being said, I have also worked with,
-- Monoliths / Microservices <span class="highlight">¯\\\_(ツ)\_/¯</span>
-- AWS
-- Apache Spark
-- Elasticsearch – ELK stack
-- Kafka
-- IaC – Terraform
-- K8s
-- Linux – LVM, RAID, systemd
-- Datomic
-- MongoDB
-- Bash scripting
-
----
-Visit the [Hugo](https://gohugo.io) website!
+I enjoy working across languages, especially Clojure, Python, Scala, Go.

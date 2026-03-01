@@ -77,7 +77,7 @@ a:hover {
   -webkit-font-smoothing: antialiased;
   font-weight: 400;
   font-family: "Inter", -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
-  font-size: 1.5rem;
+  font-size: 1.1rem;
 }
 
 .header-title {
@@ -186,7 +186,7 @@ a:hover {
 .post-date {
   -webkit-font-smoothing: antialiased;
   font-weight: 400;
-  font-size: 1.2rem;
+  font-size: 0.95rem;
   text-transform: uppercase;
   font-family: "Inter", -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
 }
@@ -194,7 +194,7 @@ a:hover {
 .posts-line > .posts-date {
   -webkit-font-smoothing: antialiased;
   font-weight: 400;
-  font-size: 1rem;
+  font-size: 0.85rem;
   margin: auto;
   text-transform: uppercase;
   font-family: "Inter", -apple-system, "SF Pro Text", "Segoe UI", sans-serif;

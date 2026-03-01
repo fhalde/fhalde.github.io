@@ -223,7 +223,7 @@ This enables progressive consumption of JSON arrays.
 
 Normally, JSON is treated as static data.
 
-`jsontap` treats it as a tree of lazily resolving promises.
+jsontap turns it into a tree of awaitable nodes.
 
 This enables:
 
@@ -232,7 +232,7 @@ This enables:
 - Progressive UI updates
 - Structured streaming workflows
 
-The LLM completion keeps unfolding your code.
+The model keeps generating while your code keeps unfolding.
 
 In hindsight, [jsontap](https://github.com/fhalde/jsontap) is the front-end for [ijson](https://github.com/ICRAR/ijson)
 

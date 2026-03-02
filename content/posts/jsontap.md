@@ -220,7 +220,6 @@ This enables:
 - Lower latency LLM pipelines
 - Early extraction
 - Progressive UI updates
-- Structured streaming workflows
 
 The model keeps generating while your code keeps unfolding.
 

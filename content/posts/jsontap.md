@@ -186,7 +186,7 @@ Arrays are more complex.
 You do not just want:
 
 ```python
-scores = await root["scores"]
+friends = await root["friends"]
 ```
 
 You want:

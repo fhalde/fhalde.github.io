@@ -77,6 +77,45 @@ Standard JSON libraries do not allow this. They require the entire JSON to be pa
 
 That's the core problem jsontap solves, using the [ijson](https://github.com/ICRAR/ijson) iterative parser.
 
+## ijson
+
+`ijson` emits a stream of `(path, event, value)` triples while input bytes are still arriving.
+
+For the JSON example above, you can inspect this with:
+
+```bash
+pbpaste | uv run python -m ijson.dump -m parse
+```
+
+Sample output:
+
+| # | path | event | value |
+|---|---|---|---|
+| 0 |  | `start_map` | `None` |
+| 1 |  | `map_key` | `user` |
+| 2 | `user` | `start_map` | `None` |
+| 3 | `user` | `map_key` | `name` |
+| 4 | `user.name` | `string` | `Alice` |
+| 5 | `user` | `map_key` | `scores` |
+| 6 | `user.scores` | `start_array` | `None` |
+| 7 | `user.scores.item` | `number` | `10` |
+| 8 | `user.scores.item` | `number` | `20` |
+| 9 | `user.scores.item` | `number` | `30` |
+| 10 | `user.scores` | `end_array` | `None` |
+| 11 | `user` | `map_key` | `friends` |
+| 12 | `user.friends` | `start_array` | `None` |
+| 13 | `user.friends.item` | `start_map` | `None` |
+| 14 | `user.friends.item` | `map_key` | `name` |
+| 15 | `user.friends.item.name` | `string` | `Bob` |
+| 16 | `user.friends.item` | `map_key` | `email` |
+| 17 | `user.friends.item.email` | `string` | `bob@example.com` |
+| 18 | `user.friends.item` | `end_map` | `None` |
+| 19 | `user.friends` | `end_array` | `None` |
+| 20 | `user` | `end_map` | `None` |
+| 21 |  | `end_map` | `None` |
+
+This event stream is exactly what jsontap uses: when a path event arrives, the corresponding awaiter can be resolved.
+
 ## Any Path Can Be Awaited
 
 The core abstraction in jsontap is the `AsyncJsonNode`:
@@ -137,7 +176,7 @@ Conceptually:
 
 Each path tracks:
 
-- A `Future` (if someone is awaiting it)
+- A future (if someone is awaiting it)
 - Cursors (for arrays)
 - Error states
 - Completion flags

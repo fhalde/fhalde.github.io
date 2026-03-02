@@ -232,6 +232,8 @@ This enables:
 
 The model keeps generating while your code keeps unfolding.
 
-In hindsight, [jsontap](https://github.com/fhalde/jsontap) is the front-end for [ijson](https://github.com/ICRAR/ijson)
+```bash
+uv add jsontap
+```
 
-`uv add jsontap` & enjoy!
+Enjoy!

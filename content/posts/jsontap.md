@@ -93,8 +93,6 @@ Even if the key `"reasoning"` has not been encountered by the parser yet, this w
 
 Under the hood, `AsyncJsonNode` implements the `Awaitable` and `AsyncIterator` protocols.
 
-## The AsyncJsonNode Wrapper
-
 When you write:
 
 ```python
@@ -103,13 +101,13 @@ node = root["user"]["scores"][1]
 
 You are not indexing into a dict.
 
-You are constructing a new node handle pointing at the path:
+You are constructing a new node handle a.k.a `AsyncJsonNode` pointing at the path:
 
 ```python
 ("user", "scores", "1")
 ```
 
-That handle:
+That `AsyncJsonNode` handle:
 
 - Can be awaited
 - Can be iterated (if it is an array)
@@ -117,7 +115,7 @@ That handle:
 
 The wrapper exists to preserve lineage information.
 
-## Everything Is Indexed by Path
+## The PathStore
 
 Internally, jsontap does not store a tree in the traditional sense (for simplicity).
 
@@ -134,10 +132,6 @@ Conceptually:
   # ...
 }
 ```
-
-The path tuple is the identity of every node.
-
-## The PathStore
 
 #### 1) Storing Node State
 

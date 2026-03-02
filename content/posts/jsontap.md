@@ -12,12 +12,7 @@ When working with LLMs for building Agentic Apps, one thing quickly becomes obvi
 
 That mismatch accumulates latency. [jsontap](https://github.com/fhalde/jsontap) closes that gap.
 
-The idea is simple:
-
-- Treat JSON as a tree of promises.
-- Any path in that tree can be awaited, even before the full JSON has been generated.
-
-This post explains the design behind that idea.
+This post explains the design behind jsontap.
 
 ## JSON Is a Tree
 

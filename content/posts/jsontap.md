@@ -157,20 +157,16 @@ Each path tracks:
 
 ### 2) Resolving Futures as Data Arrives
 
-When the incremental parser that jsontap uses [ijson](https://github.com/ICRAR/ijson) resolves a JSON node:
+When [ijson](https://github.com/ICRAR/ijson) parses a node:
 
 ```json
 "answer": 42
 ```
 
-The parser resolves the path:
+jsontap resolves the path:
 
 ```python
-("answer",)
-```
-
-```python
-future.set_result(42)
+store.get(("answer",)).future.set_result(42)
 ```
 
 If someone previously did:
@@ -200,7 +196,7 @@ async for friend in root["friends"]:
     name = await friend["name"]
 ```
 
-Before the array is even fully available.
+Before the array/array items are even fully available.
 
 To support this, `PathStore` tracks:
 

@@ -76,7 +76,7 @@ a:hover {
 .site-date-catalog {
   -webkit-font-smoothing: antialiased;
   font-weight: 400;
-  font-family: "Inter", -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
+  font-family: "Source Serif 4", "Iowan Old Style", "Palatino", "Times New Roman", serif;
   font-size: 1.1rem;
 }
 
@@ -169,7 +169,7 @@ a:hover {
 }
 
 .post-title {
-  font-family: "Inter", -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
+  font-family: "Source Serif 4", "Iowan Old Style", "Palatino", "Times New Roman", serif;
   font-size: 2rem;
   font-weight: 600;
 }
@@ -188,7 +188,7 @@ a:hover {
   font-weight: 400;
   font-size: 0.95rem;
   text-transform: uppercase;
-  font-family: "Inter", -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
+  font-family: "Source Serif 4", "Iowan Old Style", "Palatino", "Times New Roman", serif;
 }
 
 .posts-line > .posts-date {
@@ -197,11 +197,11 @@ a:hover {
   font-size: 0.85rem;
   margin: auto;
   text-transform: uppercase;
-  font-family: "Inter", -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
+  font-family: "Source Serif 4", "Iowan Old Style", "Palatino", "Times New Roman", serif;
 }
 
 .post-author {
-  font-family: "Inter", -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
+  font-family: "Source Serif 4", "Iowan Old Style", "Palatino", "Times New Roman", serif;
   float: right;
   font-weight: 600;
 }

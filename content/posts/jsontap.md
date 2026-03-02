@@ -87,8 +87,6 @@ For the JSON example above, you can inspect this with:
 pbpaste | uv run python -m ijson.dump -m parse
 ```
 
-Sample output:
-
 | # | path | event | value |
 |---|---|---|---|
 | 0 |  | `start_map` | `None` |

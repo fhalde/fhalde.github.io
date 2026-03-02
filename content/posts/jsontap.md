@@ -155,8 +155,6 @@ Each path tracks:
 - Error states
 - Completion flags
 
-It is effectively a reactive dependency graph keyed by JSON paths.
-
 ### 2) Resolving Futures as Data Arrives
 
 When the incremental parser that jsontap uses [ijson](https://github.com/ICRAR/ijson) resolves a JSON node:
@@ -171,18 +169,14 @@ The parser resolves the path:
 ("answer",)
 ```
 
+```python
+future.set_result(42)
+```
+
 If someone previously did:
 
 ```python
 await root["answer"]
-```
-
-There's a `Future` for that path in the `PathStore` already.
-
-When the value arrives, we resolve the future:
-
-```python
-future.set_result(42)
 ```
 
 The waiting coroutine resumes immediately.
@@ -202,11 +196,11 @@ scores = await root["scores"]
 You want:
 
 ```python
-async for score in root["scores"]:
-    ...
+async for friend in root["friends"]:
+    name = await friend["name"]
 ```
 
-Before the array is complete.
+Before the array is even fully available.
 
 To support this, `PathStore` tracks:
 

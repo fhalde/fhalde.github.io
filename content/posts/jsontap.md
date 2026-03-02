@@ -92,8 +92,8 @@ The core abstraction in jsontap is the `AsyncJsonNode`:
 from jsontap import jsontap
 
 root = jsontap(stream)
-reasoning = root["reasoning"] # returns a AsyncJsonNode
-await reasoning # suspends until the value is resolved
+reasoning = root["reasoning"] # returns an AsyncJsonNode
+await reasoning # suspends just until that value is available
 ```
 
 Even if the key `"reasoning"` has not been encountered by the parser yet, this works.

@@ -140,14 +140,14 @@ You are not indexing into a dict.
 You are constructing a new node handle a.k.a `AsyncJsonNode` pointing at the path:
 
 ```python
-("user", "scores", "1")
+("user", "scores", 1)
 ```
 
 That `AsyncJsonNode` handle:
 
-- Can be awaited
-- Can be iterated (if it is an array)
-- Can throw if parsing fails
+- can be awaited
+- can be iterated (if it is an array)
+- can throw if parsing fails
 
 The wrapper exists to preserve lineage information.
 
@@ -155,28 +155,15 @@ The wrapper exists to preserve lineage information.
 
 Internally, jsontap does not store a tree in the traditional sense (for simplicity).
 
-It stores a map from `path -> node state` into a `PathStore`.
+It stores a mapping from `Path -> PathState` in a `PathStore`.
 
-Conceptually:
+#### 1) PathState
 
-```python
-{
-  ("user",): {...},
-  ("user", "name"): {...},
-  ("user", "scores"): {...},
-  ("user", "scores", "0"): {...},
-  # ...
-}
-```
+A `PathState` contains:
 
-#### 1) Storing Node State
-
-Each path tracks:
-
-- A future (if someone is awaiting it)
-- Cursors (for arrays)
-- Error states
-- Completion flags
+- a `future` to be resolved when the value is available
+- the current `val`
+- completion flags like `sealed` (mostly for handling arrays)
 
 #### 2) Resolving Futures as Data Arrives
 
@@ -219,29 +206,23 @@ async for friend in root["friends"]:
 
 It's worth discussing this in more detail.
 
-By default, the iterator above isn't waiting for each array item to fully materialize.
+The iterator above isn't waiting for the array item to fully materialize before the loop body is executed.
 
 Instead, it yields an `AsyncJsonNode` handle the moment the parser recognizes the start of an array item. At that point, `friends[i]` might be half-parsed – `"name"` might exist but `"email"` is still mid-stream. This is important since items can be deeply nested objects you'd rather not wait to be fully parsed.
 
-However, sometimes you may want to wait for the entire item to be available, you can choose your pill:
+To support this, it keeps track of:
+
+- Elements by their index
+- Which array items have begun processing
+- Iteration cursors that are waiting for new elements
+
+However, sometimes you want to wait for the array item to be fully parsed before using it:
 
 ```python
 async for friend in root["friends"]:
     friend = await friend
     print(friend["name"])
-
-async for friend in root["friends"].values():
-    print(friend["name"])
 ```
-
-To support this, `PathStore` tracks:
-
-- Elements by index
-- Which indices have arrived
-- Whether the array is closed
-- Iteration cursors waiting for new elements
-
-As each array item begins to be parsed, iterators are woken up. This enables progressive consumption of JSON arrays.
 
 ## Summary
 

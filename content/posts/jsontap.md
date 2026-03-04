@@ -216,7 +216,7 @@ To support this, it keeps track of:
 - Which array items have begun processing
 - Iteration cursors that are waiting for new elements
 
-However, sometimes you want to wait for the array item to be fully parsed before using it:
+However, sometimes you may want to wait for the array item to be fully available. Here's how you do it:
 
 ```python
 async for friend in root["friends"]:

@@ -14,7 +14,7 @@ That mismatch accumulates latency. [jsontap](https://github.com/fhalde/jsontap) 
 
 This post explains the design behind jsontap.
 
-## JSON Is a Tree
+## JSON is a tree
 
 JSON is not just a string. It is a hierarchical structure.
 
@@ -61,7 +61,7 @@ Traditional JSON parsing gives you the whole tree at once. Only then can you wal
 
 But what if the tree is being built token after token?
 
-## The Streaming Problem
+## The streaming problem
 
 With LLMs, JSON arrives progressively:
 
@@ -113,7 +113,7 @@ pbpaste | uv run python -m ijson.dump -m parse
 
 This event stream is exactly what jsontap uses: when a path event arrives, the corresponding awaiter can be resolved.
 
-## Any Path Can Be Awaited
+## Any path can be awaited
 
 The core abstraction in jsontap is the `AsyncJsonNode`:
 
@@ -165,7 +165,7 @@ A `PathState` contains:
 - the current `val`
 - completion flags like `sealed` (mostly for handling arrays)
 
-#### 2) Resolving Futures as Data Arrives
+#### 2) Resolving futures as data arrives
 
 When [ijson](https://github.com/ICRAR/ijson) parses a node:
 
@@ -187,7 +187,7 @@ await root["answer"]
 
 The waiting coroutine resumes immediately.
 
-#### 3) Supporting Progressive Array Iteration
+#### 3) Supporting progressive array iteration
 
 Arrays are more complex.
 

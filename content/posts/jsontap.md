@@ -183,6 +183,7 @@ If someone previously did:
 
 ```python
 await root["answer"]
+# equivalent to self.store.get(("answer",)).future.__await__()
 ```
 
 The waiting coroutine resumes immediately.

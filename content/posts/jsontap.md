@@ -211,12 +211,6 @@ The iterator above isn't waiting for the array item to fully materialize before 
 
 Instead, it yields an `AsyncJsonNode` handle the moment the parser recognizes the start of an array item. At that point, `friends[i]` might be half-parsed – `"name"` might exist but `"email"` is still mid-stream. This is important since items can be deeply nested objects you'd rather not wait to be fully parsed.
 
-To support this, it keeps track of:
-
-- Elements by their index
-- Which array items have begun processing
-- Iteration cursors that are waiting for new elements
-
 However, sometimes you may want to wait for the array item to be fully available. Here's how you do it:
 
 ```python

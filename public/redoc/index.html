@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Schema → Redoc</title>
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #0f1117;
+      color: #e1e4e8;
+      min-height: 100vh;
+    }
+
+    /* ── Input View ─────────────────────────────────────── */
+    #input-view {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      animation: fadeIn .3s ease;
+    }
+
+    #input-view h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: .35rem;
+      background: linear-gradient(135deg, #58a6ff, #a371f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #input-view p.subtitle {
+      color: #8b949e;
+      font-size: .95rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      max-width: 560px;
+      line-height: 1.5;
+    }
+
+    .format-badges {
+      display: flex;
+      gap: .5rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .format-badge {
+      font-size: .75rem;
+      font-weight: 600;
+      padding: .3rem .7rem;
+      border-radius: 20px;
+      border: 1px solid #30363d;
+      background: #161b22;
+      color: #8b949e;
+    }
+    .format-badge.swagger  { color: #85e89d; border-color: rgba(133,232,157,.3); }
+    .format-badge.jsonschema { color: #d2a8ff; border-color: rgba(210,168,255,.3); }
+    .format-badge.crd      { color: #79c0ff; border-color: rgba(121,192,255,.3); }
+
+    .input-card {
+      width: 100%;
+      max-width: 720px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+    }
+
+    .detected-format {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: .75rem;
+      font-size: .8rem;
+      color: #8b949e;
+      min-height: 1.4rem;
+    }
+    .detected-format .badge {
+      font-weight: 600;
+      padding: .15rem .5rem;
+      border-radius: 4px;
+      font-size: .75rem;
+    }
+    .detected-format .badge.swagger   { background: rgba(133,232,157,.15); color: #85e89d; }
+    .detected-format .badge.openapi   { background: rgba(133,232,157,.15); color: #85e89d; }
+    .detected-format .badge.jsonschema { background: rgba(210,168,255,.15); color: #d2a8ff; }
+    .detected-format .badge.crd       { background: rgba(121,192,255,.15); color: #79c0ff; }
+    .detected-format .badge.unknown   { background: rgba(139,148,158,.15); color: #8b949e; }
+
+    textarea {
+      width: 100%;
+      height: 400px;
+      background: #0d1117;
+      color: #c9d1d9;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: .85rem;
+      line-height: 1.5;
+      resize: vertical;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    textarea:focus {
+      border-color: #58a6ff;
+    }
+
+    textarea::placeholder {
+      color: #484f58;
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: .75rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-row .sample-group {
+      display: flex;
+      gap: .5rem;
+      margin-right: auto;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: .6rem 1.4rem;
+      border: none;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #238636, #2ea043);
+      color: #fff;
+    }
+    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-secondary {
+      background: #21262d;
+      color: #c9d1d9;
+      border: 1px solid #30363d;
+    }
+    .btn-secondary:hover { background: #30363d; }
+
+    .btn-sample {
+      background: transparent;
+      font-size: .8rem;
+      padding: .45rem 1rem;
+      border: 1px solid;
+    }
+    .btn-sample.crd       { color: #79c0ff; border-color: rgba(121,192,255,.4); }
+    .btn-sample.crd:hover { background: rgba(121,192,255,.1); }
+    .btn-sample.swagger       { color: #85e89d; border-color: rgba(133,232,157,.4); }
+    .btn-sample.swagger:hover { background: rgba(133,232,157,.1); }
+    .btn-sample.jsonschema       { color: #d2a8ff; border-color: rgba(210,168,255,.4); }
+    .btn-sample.jsonschema:hover { background: rgba(210,168,255,.1); }
+
+    .error-msg {
+      color: #f85149;
+      background: rgba(248,81,73,.1);
+      border: 1px solid rgba(248,81,73,.25);
+      border-radius: 8px;
+      padding: .75rem 1rem;
+      margin-top: .75rem;
+      font-size: .85rem;
+      display: none;
+    }
+
+    /* ── Redoc View ─────────────────────────────────────── */
+    #redoc-view {
+      display: none;
+    }
+
+    .redoc-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .6rem 1.5rem;
+    }
+
+    .redoc-toolbar .title {
+      font-size: .95rem;
+      font-weight: 600;
+      color: #c9d1d9;
+    }
+
+    .redoc-toolbar .kind-badge {
+      background: rgba(88,166,255,.15);
+      color: #58a6ff;
+      padding: .2rem .6rem;
+      border-radius: 4px;
+      font-size: .8rem;
+      font-weight: 500;
+      margin-left: .5rem;
+    }
+
+    #redoc-container {
+      background: #fff;
+    }
+
+    /* ── Animations ──────────────────────────────────────── */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Loading spinner ────────────────────────────────── */
+    .spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2.5px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      margin-right: .5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .btn-primary .spinner { display: none; }
+    .btn-primary.loading .spinner { display: inline-block; }
+    .btn-primary.loading { pointer-events: none; opacity: .7; }
+  </style>
+</head>
+<body>
+
+<!-- ── INPUT VIEW ──────────────────────────────────────── -->
+<div id="input-view">
+  <h1>Schema → API Docs</h1>
+  <p class="subtitle">Paste a Swagger/OpenAPI spec, JSON Schema, or Kubernetes CRD to generate interactive API documentation</p>
+
+  <div class="format-badges">
+    <span class="format-badge swagger">Swagger / OpenAPI</span>
+    <span class="format-badge jsonschema">JSON Schema</span>
+    <span class="format-badge crd">K8s CRD</span>
+  </div>
+
+  <div class="input-card">
+    <div class="detected-format" id="detected-format">
+      <!-- filled dynamically -->
+    </div>
+    <textarea id="crd-input" spellcheck="false"
+      placeholder="# Paste YAML or JSON here…&#10;#&#10;# Supported formats:&#10;#   • Swagger 2.0 / OpenAPI 3.x spec (YAML or JSON)&#10;#   • JSON Schema (YAML or JSON)&#10;#   • Kubernetes CRD YAML&#10;#&#10;# The format is auto-detected."></textarea>
+    <div id="error-box" class="error-msg"></div>
+    <div class="btn-row">
+      <div class="sample-group">
+        <button class="btn-sample swagger" onclick="loadSample('swagger')">Swagger Sample</button>
+        <button class="btn-sample jsonschema" onclick="loadSample('jsonschema')">JSON Schema Sample</button>
+        <button class="btn-sample crd" onclick="loadSample('crd')">CRD Sample</button>
+      </div>
+      <button class="btn-secondary" onclick="document.getElementById('crd-input').value=''; updateDetectedFormat('');">Clear</button>
+      <button class="btn-primary" id="generate-btn" onclick="generate()">
+        <span class="spinner" id="spinner"></span>
+        Generate Docs
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── REDOC VIEW ──────────────────────────────────────── -->
+<div id="redoc-view">
+  <div class="redoc-toolbar">
+    <div style="display:flex;align-items:center;">
+      <button class="btn-secondary" onclick="goBack()" style="margin-right:1rem;">← Back</button>
+      <span class="title" id="toolbar-title">API Documentation</span>
+      <span class="kind-badge" id="toolbar-badge"></span>
+    </div>
+  </div>
+  <div id="redoc-container"></div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// Auto-detect input format & render with Redoc
+// ─────────────────────────────────────────────────────────
+
+function showError(msg) {
+  const box = document.getElementById('error-box');
+  box.textContent = msg;
+  box.style.display = 'block';
+}
+
+function hideError() {
+  document.getElementById('error-box').style.display = 'none';
+}
+
+function goBack() {
+  document.getElementById('redoc-view').style.display = 'none';
+  document.getElementById('input-view').style.display = 'flex';
+  document.getElementById('redoc-container').innerHTML = '';
+}
+
+// ── Format Detection ──────────────────────────────────────
+
+/**
+ * Detect the input format. Returns one of:
+ *   'openapi3'  – OpenAPI 3.x spec
+ *   'swagger2'  – Swagger 2.0 spec
+ *   'jsonschema' – JSON Schema document
+ *   'crd'       – Kubernetes CustomResourceDefinition
+ *   'unknown'
+ */
+function detectFormat(obj) {
+  if (!obj || typeof obj !== 'object') return 'unknown';
+
+  // OpenAPI 3.x
+  if (obj.openapi && typeof obj.openapi === 'string' && obj.openapi.startsWith('3')) {
+    return 'openapi3';
+  }
+
+  // Swagger 2.0
+  if (obj.swagger && (obj.swagger === '2.0' || obj.swagger === 2.0)) {
+    return 'swagger2';
+  }
+
+  // Kubernetes CRD
+  if (obj.kind === 'CustomResourceDefinition' || obj.apiVersion?.includes('apiextensions.k8s.io')) {
+    return 'crd';
+  }
+
+  // JSON Schema – look for $schema keyword, or typical schema-like structure
+  if (obj.$schema || obj.$id) {
+    return 'jsonschema';
+  }
+
+  // Heuristic: if it has "type" and "properties" but no "paths"/"swagger"/"openapi", likely JSON Schema
+  if (obj.type && obj.properties && !obj.paths && !obj.swagger && !obj.openapi) {
+    return 'jsonschema';
+  }
+
+  // Heuristic: if it has "definitions" or "properties" with nested structures
+  if (obj.definitions && typeof obj.definitions === 'object' && !obj.paths) {
+    return 'jsonschema';
+  }
+
+  return 'unknown';
+}
+
+function formatLabel(fmt) {
+  const labels = {
+    openapi3: 'OpenAPI 3.x',
+    swagger2: 'Swagger 2.0',
+    jsonschema: 'JSON Schema',
+    crd: 'K8s CRD',
+    unknown: 'Unknown format',
+  };
+  return labels[fmt] || fmt;
+}
+
+function formatBadgeClass(fmt) {
+  if (fmt === 'openapi3' || fmt === 'swagger2') return 'swagger';
+  if (fmt === 'jsonschema') return 'jsonschema';
+  if (fmt === 'crd') return 'crd';
+  return 'unknown';
+}
+
+// Live detection on input
+let detectTimer = null;
+document.getElementById('crd-input').addEventListener('input', function() {
+  clearTimeout(detectTimer);
+  detectTimer = setTimeout(() => updateDetectedFormat(this.value), 300);
+});
+
+function updateDetectedFormat(raw) {
+  const el = document.getElementById('detected-format');
+  if (!raw || !raw.trim()) {
+    el.innerHTML = '';
+    return;
+  }
+  try {
+    let obj;
+    try { obj = JSON.parse(raw); } catch { obj = jsyaml.load(raw); }
+    const fmt = detectFormat(obj);
+    el.innerHTML = `Detected: <span class="badge ${formatBadgeClass(fmt)}">${formatLabel(fmt)}</span>`;
+  } catch {
+    el.innerHTML = `Detected: <span class="badge unknown">Parsing…</span>`;
+  }
+}
+
+// ── JSON Schema → OpenAPI Wrapper ─────────────────────────
+
+function jsonSchemaToOpenAPI(schema) {
+  const title = schema.title || schema.$id || 'Schema';
+  const description = schema.description || `Auto-generated API documentation for **${title}**.`;
+
+  // Collect all definitions/schemas
+  const components = { schemas: {} };
+
+  // The main schema
+  const mainSchemaName = sanitizeName(title);
+  const mainSchema = convertJsonSchemaToOAS(JSON.parse(JSON.stringify(schema)));
+  components.schemas[mainSchemaName] = mainSchema;
+
+  // If the schema has definitions/$defs, pull them in
+  const defs = schema.definitions || schema.$defs || {};
+  for (const [name, def] of Object.entries(defs)) {
+    components.schemas[name] = convertJsonSchemaToOAS(JSON.parse(JSON.stringify(def)));
+  }
+
+  // Build a minimal OpenAPI spec with CRUD-like endpoints
+  const plural = mainSchemaName.toLowerCase() + 's';
+
+  const openapi = {
+    openapi: '3.0.3',
+    info: {
+      title: `${title} API`,
+      description: description,
+      version: '1.0.0',
+    },
+    tags: [
+      { name: title, description: `Operations on **${title}** objects` },
+    ],
+    paths: {
+      [`/${plural}`]: {
+        get: {
+          tags: [title],
+          summary: `List all ${title} objects`,
+          operationId: `list_${plural}`,
+          responses: {
+            '200': {
+              description: 'OK',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'array',
+                    items: { $ref: `#/components/schemas/${mainSchemaName}` },
+                  },
+                },
+              },
+            },
+          },
+        },
+        post: {
+          tags: [title],
+          summary: `Create a ${title}`,
+          operationId: `create_${mainSchemaName.toLowerCase()}`,
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: { $ref: `#/components/schemas/${mainSchemaName}` },
+              },
+            },
+          },
+          responses: {
+            '201': {
+              description: 'Created',
+              content: {
+                'application/json': {
+                  schema: { $ref: `#/components/schemas/${mainSchemaName}` },
+                },
+              },
+            },
+          },
+        },
+      },
+      [`/${plural}/{id}`]: {
+        get: {
+          tags: [title],
+          summary: `Get a ${title} by ID`,
+          operationId: `get_${mainSchemaName.toLowerCase()}`,
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: `ID of the ${title}` },
+          ],
+          responses: {
+            '200': {
+              description: 'OK',
+              content: {
+                'application/json': {
+                  schema: { $ref: `#/components/schemas/${mainSchemaName}` },
+                },
+              },
+            },
+          },
+        },
+        put: {
+          tags: [title],
+          summary: `Update a ${title}`,
+          operationId: `update_${mainSchemaName.toLowerCase()}`,
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: { $ref: `#/components/schemas/${mainSchemaName}` },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'OK',
+              content: {
+                'application/json': {
+                  schema: { $ref: `#/components/schemas/${mainSchemaName}` },
+                },
+              },
+            },
+          },
+        },
+        delete: {
+          tags: [title],
+          summary: `Delete a ${title}`,
+          operationId: `delete_${mainSchemaName.toLowerCase()}`,
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+          ],
+          responses: {
+            '204': { description: 'Deleted' },
+          },
+        },
+      },
+    },
+    components,
+  };
+
+  return openapi;
+}
+
+function sanitizeName(name) {
+  return name.replace(/[^a-zA-Z0-9_]/g, '_').replace(/^_+|_+$/g, '') || 'Schema';
+}
+
+/**
+ * Convert JSON Schema keywords to OAS-compatible schema.
+ * Resolves $ref from definitions/$defs to #/components/schemas/...
+ */
+function convertJsonSchemaToOAS(schema) {
+  if (!schema || typeof schema !== 'object') return schema;
+  if (Array.isArray(schema)) return schema.map(convertJsonSchemaToOAS);
+
+  // Rewrite $ref from #/definitions/X or #/$defs/X to #/components/schemas/X
+  if (schema.$ref && typeof schema.$ref === 'string') {
+    schema.$ref = schema.$ref
+      .replace(/^#\/definitions\//, '#/components/schemas/')
+      .replace(/^#\/\$defs\//, '#/components/schemas/');
+    return schema;
+  }
+
+  // Remove JSON Schema keywords not in OAS 3.0
+  delete schema.$schema;
+  delete schema.$id;
+  delete schema.definitions;
+  delete schema.$defs;
+
+  // Ensure type
+  if (schema.properties && !schema.type) schema.type = 'object';
+  if (schema.items && !schema.type) schema.type = 'array';
+
+  // Recurse
+  if (schema.properties) {
+    for (const key of Object.keys(schema.properties)) {
+      schema.properties[key] = convertJsonSchemaToOAS(schema.properties[key]);
+    }
+  }
+  if (schema.items) schema.items = convertJsonSchemaToOAS(schema.items);
+  if (schema.additionalProperties && typeof schema.additionalProperties === 'object') {
+    schema.additionalProperties = convertJsonSchemaToOAS(schema.additionalProperties);
+  }
+  for (const kw of ['allOf', 'anyOf', 'oneOf']) {
+    if (Array.isArray(schema[kw])) {
+      schema[kw] = schema[kw].map(convertJsonSchemaToOAS);
+    }
+  }
+
+  return schema;
+}
+
+// ── CRD → OpenAPI (existing logic) ───────────────────────
+
+function crdToOpenAPI(crd) {
+  if (!crd || crd.kind !== 'CustomResourceDefinition') {
+    throw new Error('The YAML does not appear to be a CustomResourceDefinition (missing kind: CustomResourceDefinition).');
+  }
+
+  const spec = crd.spec;
+  if (!spec) throw new Error('CRD is missing "spec" field.');
+
+  const group = spec.group;
+  const names = spec.names || {};
+  const kind = names.kind || 'UnknownKind';
+  const plural = names.plural || 'resources';
+  const singular = names.singular || kind.toLowerCase();
+  const listKind = names.listKind || `${kind}List`;
+  const scope = spec.scope || 'Namespaced';
+
+  const versions = spec.versions || [];
+  if (versions.length === 0) {
+    throw new Error('CRD has no versions defined under spec.versions.');
+  }
+
+  const openapi = {
+    openapi: '3.0.3',
+    info: {
+      title: `${kind} API`,
+      description: buildInfoDescription(crd),
+      version: versions.find(v => v.served)?.name || versions[0].name,
+    },
+    servers: [{ url: '/apis/' + group }],
+    tags: [],
+    paths: {},
+    components: { schemas: {} },
+  };
+
+  for (const ver of versions) {
+    if (ver.served === false) continue;
+
+    const versionName = ver.name;
+    const schema = ver.schema?.openAPIV3Schema;
+    if (!schema) continue;
+
+    const tag = `${kind} (${versionName})`;
+    openapi.tags.push({
+      name: tag,
+      description: `Operations on **${kind}** resources (API version \`${group}/${versionName}\`, scope: ${scope})`,
+    });
+
+    const schemaName = `${kind}_${versionName}`;
+    const listSchemaName = `${listKind}_${versionName}`;
+
+    const cleanedSchema = processSchema(JSON.parse(JSON.stringify(schema)));
+    cleanedSchema['x-kubernetes-group-version-kind'] = [{ group, kind, version: versionName }];
+
+    openapi.components.schemas[schemaName] = cleanedSchema;
+
+    openapi.components.schemas[listSchemaName] = {
+      type: 'object',
+      description: `${listKind} is a list of ${kind} resources.`,
+      required: ['items'],
+      properties: {
+        apiVersion: { type: 'string', description: 'APIVersion defines the versioned schema.' },
+        kind: { type: 'string', description: 'Kind is a string value representing the REST resource.' },
+        metadata: { type: 'object', description: 'Standard list metadata.' },
+        items: {
+          type: 'array',
+          description: `List of ${kind} resources.`,
+          items: { $ref: `#/components/schemas/${schemaName}` },
+        },
+      },
+    };
+
+    const ref = { $ref: `#/components/schemas/${schemaName}` };
+    const listRef = { $ref: `#/components/schemas/${listSchemaName}` };
+
+    if (scope === 'Namespaced') {
+      const collectionPath = `/${versionName}/namespaces/{namespace}/${plural}`;
+      const itemPath = `/${versionName}/namespaces/{namespace}/${plural}/{name}`;
+
+      openapi.paths[collectionPath] = {
+        get: {
+          tags: [tag], summary: `List ${kind} in a namespace`, operationId: `list_${versionName}_${plural}`,
+          parameters: [{ name: 'namespace', in: 'path', required: true, schema: { type: 'string' }, description: 'Namespace of the resource.' }],
+          responses: { '200': { description: 'OK', content: { 'application/json': { schema: listRef } } } },
+        },
+        post: {
+          tags: [tag], summary: `Create a ${kind}`, operationId: `create_${versionName}_${singular}`,
+          parameters: [{ name: 'namespace', in: 'path', required: true, schema: { type: 'string' }, description: 'Namespace of the resource.' }],
+          requestBody: { required: true, content: { 'application/json': { schema: ref } } },
+          responses: { '201': { description: 'Created', content: { 'application/json': { schema: ref } } } },
+        },
+      };
+
+      openapi.paths[itemPath] = {
+        get: {
+          tags: [tag], summary: `Read a ${kind}`, operationId: `read_${versionName}_${singular}`,
+          parameters: [
+            { name: 'namespace', in: 'path', required: true, schema: { type: 'string' } },
+            { name: 'name', in: 'path', required: true, schema: { type: 'string' }, description: 'Name of the resource.' },
+          ],
+          responses: { '200': { description: 'OK', content: { 'application/json': { schema: ref } } } },
+        },
+        put: {
+          tags: [tag], summary: `Replace a ${kind}`, operationId: `replace_${versionName}_${singular}`,
+          parameters: [
+            { name: 'namespace', in: 'path', required: true, schema: { type: 'string' } },
+            { name: 'name', in: 'path', required: true, schema: { type: 'string' } },
+          ],
+          requestBody: { required: true, content: { 'application/json': { schema: ref } } },
+          responses: { '200': { description: 'OK', content: { 'application/json': { schema: ref } } } },
+        },
+        patch: {
+          tags: [tag], summary: `Patch a ${kind}`, operationId: `patch_${versionName}_${singular}`,
+          parameters: [
+            { name: 'namespace', in: 'path', required: true, schema: { type: 'string' } },
+            { name: 'name', in: 'path', required: true, schema: { type: 'string' } },
+          ],
+          requestBody: { required: true, content: { 'application/merge-patch+json': { schema: ref } } },
+          responses: { '200': { description: 'OK', content: { 'application/json': { schema: ref } } } },
+        },
+        delete: {
+          tags: [tag], summary: `Delete a ${kind}`, operationId: `delete_${versionName}_${singular}`,
+          parameters: [
+            { name: 'namespace', in: 'path', required: true, schema: { type: 'string' } },
+            { name: 'name', in: 'path', required: true, schema: { type: 'string' } },
+          ],
+          responses: { '200': { description: 'OK' } },
+        },
+      };
+    } else {
+      const collectionPath = `/${versionName}/${plural}`;
+      const itemPath = `/${versionName}/${plural}/{name}`;
+
+      openapi.paths[collectionPath] = {
+        get: {
+          tags: [tag], summary: `List ${kind}`, operationId: `list_${versionName}_${plural}`,
+          responses: { '200': { description: 'OK', content: { 'application/json': { schema: listRef } } } },
+        },
+        post: {
+          tags: [tag], summary: `Create a ${kind}`, operationId: `create_${versionName}_${singular}`,
+          requestBody: { required: true, content: { 'application/json': { schema: ref } } },
+          responses: { '201': { description: 'Created', content: { 'application/json': { schema: ref } } } },
+        },
+      };
+
+      openapi.paths[itemPath] = {
+        get: {
+          tags: [tag], summary: `Read a ${kind}`, operationId: `read_${versionName}_${singular}`,
+          parameters: [{ name: 'name', in: 'path', required: true, schema: { type: 'string' }, description: 'Name of the resource.' }],
+          responses: { '200': { description: 'OK', content: { 'application/json': { schema: ref } } } },
+        },
+        put: {
+          tags: [tag], summary: `Replace a ${kind}`, operationId: `replace_${versionName}_${singular}`,
+          parameters: [{ name: 'name', in: 'path', required: true, schema: { type: 'string' } }],
+          requestBody: { required: true, content: { 'application/json': { schema: ref } } },
+          responses: { '200': { description: 'OK', content: { 'application/json': { schema: ref } } } },
+        },
+        patch: {
+          tags: [tag], summary: `Patch a ${kind}`, operationId: `patch_${versionName}_${singular}`,
+          parameters: [{ name: 'name', in: 'path', required: true, schema: { type: 'string' } }],
+          requestBody: { required: true, content: { 'application/merge-patch+json': { schema: ref } } },
+          responses: { '200': { description: 'OK', content: { 'application/json': { schema: ref } } } },
+        },
+        delete: {
+          tags: [tag], summary: `Delete a ${kind}`, operationId: `delete_${versionName}_${singular}`,
+          parameters: [{ name: 'name', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { '200': { description: 'OK' } },
+        },
+      };
+    }
+
+    // Status sub-resource
+    if (ver.subresources?.status) {
+      const statusPath = scope === 'Namespaced'
+        ? `/${versionName}/namespaces/{namespace}/${plural}/{name}/status`
+        : `/${versionName}/${plural}/{name}/status`;
+      const params = scope === 'Namespaced'
+        ? [
+            { name: 'namespace', in: 'path', required: true, schema: { type: 'string' } },
+            { name: 'name', in: 'path', required: true, schema: { type: 'string' } },
+          ]
+        : [{ name: 'name', in: 'path', required: true, schema: { type: 'string' } }];
+
+      openapi.paths[statusPath] = {
+        get: {
+          tags: [tag], summary: `Read status of a ${kind}`, operationId: `read_${versionName}_${singular}_status`,
+          parameters: params,
+          responses: { '200': { description: 'OK', content: { 'application/json': { schema: ref } } } },
+        },
+        put: {
+          tags: [tag], summary: `Replace status of a ${kind}`, operationId: `replace_${versionName}_${singular}_status`,
+          parameters: params,
+          requestBody: { required: true, content: { 'application/json': { schema: ref } } },
+          responses: { '200': { description: 'OK', content: { 'application/json': { schema: ref } } } },
+        },
+        patch: {
+          tags: [tag], summary: `Patch status of a ${kind}`, operationId: `patch_${versionName}_${singular}_status`,
+          parameters: params,
+          requestBody: { required: true, content: { 'application/merge-patch+json': { schema: ref } } },
+          responses: { '200': { description: 'OK', content: { 'application/json': { schema: ref } } } },
+        },
+      };
+    }
+  }
+
+  return openapi;
+}
+
+function processSchema(schema) {
+  if (!schema || typeof schema !== 'object') return schema;
+  if (Array.isArray(schema)) return schema.map(processSchema);
+
+  if (schema.properties && !schema.type) schema.type = 'object';
+  if (schema.items && !schema.type) schema.type = 'array';
+
+  if (schema.properties) {
+    for (const key of Object.keys(schema.properties)) {
+      schema.properties[key] = processSchema(schema.properties[key]);
+    }
+  }
+  if (schema.items) schema.items = processSchema(schema.items);
+  if (schema.additionalProperties && typeof schema.additionalProperties === 'object') {
+    schema.additionalProperties = processSchema(schema.additionalProperties);
+  }
+  for (const combiner of ['allOf', 'anyOf', 'oneOf']) {
+    if (Array.isArray(schema[combiner])) {
+      schema[combiner] = schema[combiner].map(processSchema);
+    }
+  }
+
+  return schema;
+}
+
+function buildInfoDescription(crd) {
+  const spec = crd.spec;
+  const names = spec.names || {};
+  const group = spec.group;
+  const kind = names.kind;
+  const plural = names.plural;
+  const scope = spec.scope || 'Namespaced';
+  const versions = (spec.versions || []).filter(v => v.served !== false).map(v => v.name);
+
+  let desc = `## ${kind}\n\n`;
+  desc += `| Property | Value |\n|---|---|\n`;
+  desc += `| **Group** | \`${group}\` |\n`;
+  desc += `| **Kind** | \`${kind}\` |\n`;
+  desc += `| **Plural** | \`${plural}\` |\n`;
+  desc += `| **Scope** | ${scope} |\n`;
+  desc += `| **Served Versions** | ${versions.map(v => '`' + v + '`').join(', ')} |\n`;
+
+  if (names.shortNames?.length) {
+    desc += `| **Short Names** | ${names.shortNames.map(s => '`' + s + '`').join(', ')} |\n`;
+  }
+  if (names.categories?.length) {
+    desc += `| **Categories** | ${names.categories.join(', ')} |\n`;
+  }
+
+  return desc;
+}
+
+// ── Main generate function ────────────────────────────────
+
+async function generate() {
+  hideError();
+  const raw = document.getElementById('crd-input').value.trim();
+
+  if (!raw) {
+    showError('Please paste a spec or schema first.');
+    return;
+  }
+
+  const btn = document.getElementById('generate-btn');
+  btn.classList.add('loading');
+
+  try {
+    // Parse YAML or JSON
+    let parsed;
+    try {
+      // Try JSON first (faster), fall back to YAML
+      try { parsed = JSON.parse(raw); } catch { parsed = jsyaml.load(raw); }
+    } catch (e) {
+      throw new Error('Invalid YAML/JSON: ' + e.message);
+    }
+
+    // Detect format
+    const format = detectFormat(parsed);
+    let openapiSpec;
+    let toolbarTitle = 'API Documentation';
+    let toolbarBadge = '';
+
+    switch (format) {
+      case 'openapi3':
+        // Already an OpenAPI 3.x spec — pass directly to Redoc
+        openapiSpec = parsed;
+        toolbarTitle = parsed.info?.title || 'OpenAPI Documentation';
+        toolbarBadge = `OpenAPI ${parsed.openapi}`;
+        break;
+
+      case 'swagger2':
+        // Swagger 2.0 — Redoc can handle it natively
+        openapiSpec = parsed;
+        toolbarTitle = parsed.info?.title || 'Swagger Documentation';
+        toolbarBadge = 'Swagger 2.0';
+        break;
+
+      case 'crd':
+        // Kubernetes CRD — convert to OpenAPI
+        openapiSpec = crdToOpenAPI(parsed);
+        toolbarTitle = `${parsed.spec?.names?.kind || 'CRD'} API Documentation`;
+        toolbarBadge = parsed.spec?.group || 'CRD';
+        break;
+
+      case 'jsonschema':
+        // JSON Schema — wrap in OpenAPI
+        openapiSpec = jsonSchemaToOpenAPI(parsed);
+        toolbarTitle = `${parsed.title || 'Schema'} Documentation`;
+        toolbarBadge = 'JSON Schema';
+        break;
+
+      default:
+        throw new Error(
+          'Could not detect the format. Supported formats:\n' +
+          '• Swagger 2.0 / OpenAPI 3.x spec\n' +
+          '• JSON Schema\n' +
+          '• Kubernetes CRD YAML'
+        );
+    }
+
+    // Switch views
+    document.getElementById('input-view').style.display = 'none';
+    const redocView = document.getElementById('redoc-view');
+    redocView.style.display = 'block';
+
+    document.getElementById('toolbar-title').textContent = toolbarTitle;
+    document.getElementById('toolbar-badge').textContent = toolbarBadge;
+
+    // Render Redoc
+    const container = document.getElementById('redoc-container');
+    container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:60vh;color:#666;font-size:1.1rem;">Loading Redoc…</div>';
+
+    await loadRedoc();
+
+    Redoc.init(openapiSpec, {
+      theme: {
+        colors: { primary: { main: '#58a6ff' } },
+        typography: {
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+          headings: { fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' },
+        },
+        sidebar: { backgroundColor: '#f6f8fa' },
+        rightPanel: { backgroundColor: '#1e2128' },
+      },
+      scrollYOffset: 50,
+      hideDownloadButton: false,
+      expandResponses: '200,201',
+      jsonSampleExpandLevel: 3,
+      sortOperationsAlphabetically: false,
+      sortTagsAlphabetically: false,
+    }, container);
+
+  } catch (err) {
+    showError(err.message);
+    document.getElementById('input-view').style.display = 'flex';
+    document.getElementById('redoc-view').style.display = 'none';
+  } finally {
+    btn.classList.remove('loading');
+  }
+}
+
+// ── Lazy-load Redoc standalone bundle ─────────────────────
+
+let redocLoaded = false;
+
+function loadRedoc() {
+  if (redocLoaded) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js';
+    script.onload = () => { redocLoaded = true; resolve(); };
+    script.onerror = () => reject(new Error('Failed to load Redoc. Check your internet connection.'));
+    document.head.appendChild(script);
+  });
+}
+
+// ── Sample Data ───────────────────────────────────────────
+
+function loadSample(type) {
+  const ta = document.getElementById('crd-input');
+  if (type === 'swagger') ta.value = SAMPLE_SWAGGER;
+  else if (type === 'jsonschema') ta.value = SAMPLE_JSON_SCHEMA;
+  else ta.value = SAMPLE_CRD;
+  updateDetectedFormat(ta.value);
+}
+
+const SAMPLE_SWAGGER = `{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Pet Store API",
+    "description": "A sample Pet Store API to demonstrate OpenAPI rendering with Redoc.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support",
+      "email": "support@petstore.example.com"
+    }
+  },
+  "servers": [
+    { "url": "https://api.petstore.example.com/v1" }
+  ],
+  "tags": [
+    { "name": "Pets", "description": "Everything about your Pets" },
+    { "name": "Store", "description": "Access to the Pet Store" }
+  ],
+  "paths": {
+    "/pets": {
+      "get": {
+        "tags": ["Pets"],
+        "summary": "List all pets",
+        "operationId": "listPets",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "How many items to return (max 100)",
+            "required": false,
+            "schema": { "type": "integer", "format": "int32", "maximum": 100 }
+          },
+          {
+            "name": "species",
+            "in": "query",
+            "description": "Filter by species",
+            "schema": { "type": "string", "enum": ["dog", "cat", "bird", "fish"] }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of pets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Pet" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Pets"],
+        "summary": "Create a pet",
+        "operationId": "createPet",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NewPet" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pet created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Pet" }
+              }
+            }
+          },
+          "400": { "description": "Invalid input" }
+        }
+      }
+    },
+    "/pets/{petId}": {
+      "get": {
+        "tags": ["Pets"],
+        "summary": "Get a pet by ID",
+        "operationId": "getPet",
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A single pet",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Pet" }
+              }
+            }
+          },
+          "404": { "description": "Pet not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Pets"],
+        "summary": "Delete a pet",
+        "operationId": "deletePet",
+        "parameters": [
+          { "name": "petId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "204": { "description": "Pet deleted" },
+          "404": { "description": "Pet not found" }
+        }
+      }
+    },
+    "/store/inventory": {
+      "get": {
+        "tags": ["Store"],
+        "summary": "Returns pet inventories by status",
+        "operationId": "getInventory",
+        "responses": {
+          "200": {
+            "description": "Inventory counts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": { "type": "integer", "format": "int32" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pet": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "string", "description": "Unique identifier", "example": "pet-abc123" },
+          "name": { "type": "string", "description": "Name of the pet", "example": "Buddy" },
+          "species": { "type": "string", "enum": ["dog", "cat", "bird", "fish"], "example": "dog" },
+          "breed": { "type": "string", "description": "Breed of the pet", "example": "Golden Retriever" },
+          "age": { "type": "integer", "description": "Age in years", "example": 3 },
+          "status": { "type": "string", "enum": ["available", "adopted", "pending"], "default": "available" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags for categorisation"
+          },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "NewPet": {
+        "type": "object",
+        "required": ["name", "species"],
+        "properties": {
+          "name": { "type": "string", "example": "Buddy" },
+          "species": { "type": "string", "enum": ["dog", "cat", "bird", "fish"] },
+          "breed": { "type": "string" },
+          "age": { "type": "integer" },
+          "tags": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}`;
+
+const SAMPLE_JSON_SCHEMA = `{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/user-profile",
+  "title": "UserProfile",
+  "description": "A user profile object representing a registered user in the system.",
+  "type": "object",
+  "required": ["id", "email", "name"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for the user."
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Primary email address."
+    },
+    "name": {
+      "$ref": "#/$defs/FullName"
+    },
+    "avatar": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the user's avatar image."
+    },
+    "bio": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Short biography (max 500 chars)."
+    },
+    "role": {
+      "type": "string",
+      "enum": ["admin", "editor", "viewer"],
+      "default": "viewer",
+      "description": "The user's role in the system."
+    },
+    "preferences": {
+      "$ref": "#/$defs/Preferences"
+    },
+    "address": {
+      "$ref": "#/$defs/Address"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Arbitrary tags for categorisation."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the user account was created."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the profile was last updated."
+    }
+  },
+  "$defs": {
+    "FullName": {
+      "type": "object",
+      "description": "A person's full name.",
+      "required": ["first", "last"],
+      "properties": {
+        "first": { "type": "string", "description": "First / given name." },
+        "last": { "type": "string", "description": "Last / family name." },
+        "middle": { "type": "string", "description": "Middle name (optional)." }
+      }
+    },
+    "Preferences": {
+      "type": "object",
+      "description": "User display and notification preferences.",
+      "properties": {
+        "theme": {
+          "type": "string",
+          "enum": ["light", "dark", "system"],
+          "default": "system",
+          "description": "UI colour theme."
+        },
+        "language": {
+          "type": "string",
+          "description": "Preferred locale (BCP-47 tag).",
+          "example": "en-US"
+        },
+        "emailNotifications": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to send email notifications."
+        }
+      }
+    },
+    "Address": {
+      "type": "object",
+      "description": "A postal address.",
+      "properties": {
+        "street": { "type": "string" },
+        "city": { "type": "string" },
+        "state": { "type": "string" },
+        "postalCode": { "type": "string" },
+        "country": {
+          "type": "string",
+          "description": "ISO 3166-1 alpha-2 country code.",
+          "minLength": 2,
+          "maxLength": 2
+        }
+      }
+    }
+  }
+}`;
+
+const SAMPLE_CRD = `apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: certificates.cert-manager.io
+spec:
+  group: cert-manager.io
+  names:
+    kind: Certificate
+    listKind: CertificateList
+    plural: certificates
+    singular: certificate
+    shortNames:
+      - cert
+      - certs
+    categories:
+      - cert-manager
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      schema:
+        openAPIV3Schema:
+          type: object
+          description: >-
+            A Certificate resource should be created to ensure an up to date
+            and signed X.509 certificate is stored in the Kubernetes Secret
+            resource named in \\\`spec.secretName\\\`.
+          properties:
+            apiVersion:
+              type: string
+              description: APIVersion defines the versioned schema of this representation of an object.
+            kind:
+              type: string
+              description: Kind is a string value representing the REST resource this object represents.
+            metadata:
+              type: object
+            spec:
+              type: object
+              description: Specification of the desired behavior of the Certificate.
+              required:
+                - issuerRef
+                - secretName
+              properties:
+                secretName:
+                  type: string
+                  description: Name of the Secret resource that will be created and managed by the Certificate controller.
+                secretTemplate:
+                  type: object
+                  description: Defines annotations and labels to be set on the Certificate's Secret.
+                  properties:
+                    annotations:
+                      type: object
+                      additionalProperties:
+                        type: string
+                      description: Annotations to be set on the Secret.
+                    labels:
+                      type: object
+                      additionalProperties:
+                        type: string
+                      description: Labels to be set on the Secret.
+                duration:
+                  type: string
+                  description: >-
+                    Requested \\\`duration\\\` (i.e. lifetime) of the Certificate.
+                    Defaults to 2160h (90 days).
+                renewBefore:
+                  type: string
+                  description: >-
+                    How long before the currently issued certificate's expiry
+                    cert-manager should renew the certificate.
+                commonName:
+                  type: string
+                  description: >-
+                    Requested common name X509 certificate subject attribute.
+                dnsNames:
+                  type: array
+                  description: Requested DNS subject alternative names.
+                  items:
+                    type: string
+                ipAddresses:
+                  type: array
+                  description: Requested IP address subject alternative names.
+                  items:
+                    type: string
+                uris:
+                  type: array
+                  description: Requested URI subject alternative names.
+                  items:
+                    type: string
+                emailAddresses:
+                  type: array
+                  description: Requested email subject alternative names.
+                  items:
+                    type: string
+                isCA:
+                  type: boolean
+                  description: >-
+                    Requested basic constraints isCA value. Defaults to false.
+                usages:
+                  type: array
+                  description: >-
+                    Requested key usages and extended key usages.
+                  items:
+                    type: string
+                    enum:
+                      - signing
+                      - digital signature
+                      - content commitment
+                      - key encipherment
+                      - key agreement
+                      - data encipherment
+                      - cert sign
+                      - crl sign
+                      - encipher only
+                      - decipher only
+                      - any
+                      - server auth
+                      - client auth
+                      - code signing
+                      - email protection
+                      - s/mime
+                      - ipsec end system
+                      - ipsec tunnel
+                      - ipsec user
+                      - timestamping
+                      - ocsp signing
+                      - microsoft sgc
+                      - netscape sgc
+                privateKey:
+                  type: object
+                  description: Options to control private keys used for the Certificate.
+                  properties:
+                    rotationPolicy:
+                      type: string
+                      description: >-
+                        Denotes how private keys should be generated or sourced when a Certificate is being issued.
+                      enum:
+                        - Never
+                        - Always
+                    encoding:
+                      type: string
+                      description: >-
+                        The private key cryptography standards (PKCS) encoding for this certificate's private key to be encoded in. Defaults to PKCS1.
+                      enum:
+                        - PKCS1
+                        - PKCS8
+                    algorithm:
+                      type: string
+                      description: Algorithm is the private key algorithm. Defaults to RSA.
+                      enum:
+                        - RSA
+                        - ECDSA
+                        - Ed25519
+                    size:
+                      type: integer
+                      description: >-
+                        Size is the key bit size of the corresponding private key for this certificate.
+                        Defaults to 2048 for RSA, 256 for ECDSA, ignored for Ed25519.
+                issuerRef:
+                  type: object
+                  description: Reference to the issuer responsible for issuing the certificate.
+                  required:
+                    - name
+                  properties:
+                    name:
+                      type: string
+                      description: Name of the resource being referred to.
+                    kind:
+                      type: string
+                      description: Kind of the resource being referred to.
+                    group:
+                      type: string
+                      description: Group of the resource being referred to.
+                subject:
+                  type: object
+                  description: Requested set of X509 certificate subject attributes.
+                  properties:
+                    organizations:
+                      type: array
+                      description: Organizations to be used on the Certificate.
+                      items:
+                        type: string
+                    countries:
+                      type: array
+                      description: Countries to be used on the Certificate.
+                      items:
+                        type: string
+                    organizationalUnits:
+                      type: array
+                      description: Organizational Units to be used on the Certificate.
+                      items:
+                        type: string
+                    localities:
+                      type: array
+                      description: Cities to be used on the Certificate.
+                      items:
+                        type: string
+                    provinces:
+                      type: array
+                      description: State/Provinces to be used on the Certificate.
+                      items:
+                        type: string
+                    streetAddresses:
+                      type: array
+                      description: Street addresses to be used on the Certificate.
+                      items:
+                        type: string
+                    postalCodes:
+                      type: array
+                      description: Postal codes to be used on the Certificate.
+                      items:
+                        type: string
+                    serialNumber:
+                      type: string
+                      description: Serial number to be used on the Certificate.
+                revisionHistoryLimit:
+                  type: integer
+                  description: >-
+                    The maximum number of CertificateRequest revisions that are maintained in
+                    the Certificate's history. Defaults to keeping all revisions.
+                  format: int32
+            status:
+              type: object
+              description: Status of the Certificate as observed by the controller.
+              properties:
+                conditions:
+                  type: array
+                  description: List of status conditions to indicate the status of certificates.
+                  items:
+                    type: object
+                    required:
+                      - status
+                      - type
+                    properties:
+                      type:
+                        type: string
+                        description: Type of the condition.
+                      status:
+                        type: string
+                        description: Status of the condition.
+                        enum:
+                          - "True"
+                          - "False"
+                          - Unknown
+                      lastTransitionTime:
+                        type: string
+                        format: date-time
+                        description: LastTransitionTime is the timestamp of the last update to this condition.
+                      reason:
+                        type: string
+                        description: Reason is a brief machine readable explanation for the condition's last transition.
+                      message:
+                        type: string
+                        description: Message is a human readable description of the details of the last transition.
+                      observedGeneration:
+                        type: integer
+                        format: int64
+                        description: ObservedGeneration represents the .metadata.generation that the condition was set based upon.
+                lastFailureTime:
+                  type: string
+                  format: date-time
+                  description: LastFailureTime is set only if the latest issuance for this Certificate failed.
+                notBefore:
+                  type: string
+                  format: date-time
+                  description: >-
+                    The time after which the certificate stored in the secret named
+                    by this resource in spec.secretName is valid.
+                notAfter:
+                  type: string
+                  format: date-time
+                  description: >-
+                    The expiration time of the certificate stored in the secret named
+                    by this resource in spec.secretName.
+                renewalTime:
+                  type: string
+                  format: date-time
+                  description: RenewalTime is the time at which the certificate will be next renewed.
+                revision:
+                  type: integer
+                  description: >-
+                    The current 'revision' of the certificate as issued. Incremented on each renewal.
+                nextPrivateKeySecretName:
+                  type: string
+                  description: >-
+                    The name of the Secret which contains the next private key to be used
+                    for the next certificate iteration.
+                failedIssuanceAttempts:
+                  type: integer
+                  description: >-
+                    The number of continuous failed issuance attempts up till now.
+`;
+</script>
+
+</body>
+</html>

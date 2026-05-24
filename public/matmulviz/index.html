@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Matmul Viz</title>
+  <style>
+    :root {
+      --cell: 14px;
+      --gap: 1px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 10px;
+      color: #111;
+      background: #fff;
+      font: 13px/1.35 system-ui, sans-serif;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      gap: 8px;
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    label {
+      display: grid;
+      gap: 2px;
+      color: #555;
+      font-size: 11px;
+    }
+
+    input,
+    select,
+    button {
+      height: 26px;
+      padding: 2px 6px;
+      border: 1px solid #999;
+      border-radius: 3px;
+      background: #fff;
+      color: #111;
+      font: inherit;
+    }
+
+    input[type="number"] {
+      width: 58px;
+    }
+
+    input[type="range"] {
+      width: 90px;
+      padding: 0;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    .status {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .matrices {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      align-items: start;
+    }
+
+    .title {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3px;
+      font-weight: 700;
+    }
+
+    .shape {
+      color: #666;
+      font-weight: 400;
+    }
+
+    .scroll {
+      max-height: calc(100vh - 140px);
+      overflow: auto;
+      border: 1px solid #ccc;
+      background: #eee;
+    }
+
+    .matrix {
+      display: grid;
+      gap: var(--gap);
+      width: max-content;
+      padding: var(--gap);
+    }
+
+    .cell {
+      width: var(--cell);
+      height: var(--cell);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: #fff;
+      color: #111;
+      font-size: 9px;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      user-select: none;
+    }
+
+    .tiny .cell {
+      color: transparent;
+    }
+
+    .active-a {
+      outline: 2px solid #005fdc;
+      z-index: 1;
+    }
+
+    .active-b {
+      outline: 2px solid #aa23be;
+      z-index: 1;
+    }
+
+    .active-c {
+      outline: 2px solid #e68c00;
+      z-index: 1;
+    }
+
+    .done {
+      background: #27a844 !important;
+      color: #fff;
+    }
+
+    .flash {
+      animation: flash 140ms linear;
+    }
+
+    @keyframes flash {
+      from {
+        background: yellow;
+        color: #111;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .matrices {
+        grid-template-columns: 1fr;
+      }
+
+      .scroll {
+        max-height: 45vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>matmul viz</h1>
+
+  <div class="controls">
+    <label>m <input id="m" type="number" min="1" max="128" value="16"></label>
+    <label>n <input id="n" type="number" min="1" max="128" value="16"></label>
+    <label>p <input id="p" type="number" min="1" max="128" value="16"></label>
+    <label>
+      order
+      <select id="order">
+        <option>ijk</option>
+        <option>ikj</option>
+        <option>jik</option>
+        <option>jki</option>
+        <option>kij</option>
+        <option>kji</option>
+      </select>
+    </label>
+    <label>cell <input id="cellSize" type="range" min="5" max="28" value="14"></label>
+    <label>steps/s <input id="speed" type="range" min="1" max="3000" value="600"></label>
+    <button id="rebuild">rebuild</button>
+    <button id="randomize">randomize</button>
+    <button id="step">step</button>
+    <button id="play">play</button>
+    <button id="finish">finish</button>
+  </div>
+
+  <div class="status">
+    <span id="shape"></span>
+    <span id="progress"></span>
+    <span id="indices"></span>
+    <span id="op"></span>
+  </div>
+
+  <div class="matrices">
+    <section>
+      <div class="title">A <span id="aShape" class="shape"></span></div>
+      <div class="scroll"><div id="A" class="matrix"></div></div>
+    </section>
+    <section>
+      <div class="title">B <span id="bShape" class="shape"></span></div>
+      <div class="scroll"><div id="B" class="matrix"></div></div>
+    </section>
+    <section>
+      <div class="title">C <span id="cShape" class="shape"></span></div>
+      <div class="scroll"><div id="C" class="matrix"></div></div>
+    </section>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const ui = {
+      m: $("m"),
+      n: $("n"),
+      p: $("p"),
+      order: $("order"),
+      cellSize: $("cellSize"),
+      speed: $("speed"),
+      rebuild: $("rebuild"),
+      randomize: $("randomize"),
+      step: $("step"),
+      play: $("play"),
+      finish: $("finish"),
+      shape: $("shape"),
+      progress: $("progress"),
+      indices: $("indices"),
+      op: $("op"),
+      aShape: $("aShape"),
+      bShape: $("bShape"),
+      cShape: $("cShape"),
+      A: $("A"),
+      B: $("B"),
+      C: $("C"),
+    };
+
+    const sim = {
+      m: 16,
+      n: 16,
+      p: 16,
+      order: "ijk",
+      A: [],
+      B: [],
+      C: [],
+      done: [],
+      events: [],
+      pos: 0,
+      timer: 0,
+      credit: 0,
+      lastFrame: 0,
+      last: null,
+      heatA: new Map(),
+      heatB: new Map(),
+    };
+
+    const TRAIL_STEPS = 80;
+    const TRAIL_MS = 1200;
+
+    function dim(input) {
+      return Math.max(1, Math.min(128, Number(input.value) || 1));
+    }
+
+    function matrix(rows, cols, fill) {
+      return Array.from({ length: rows }, () =>
+        Array.from({ length: cols }, () => fill())
+      );
+    }
+
+    function zeros(rows, cols) {
+      return matrix(rows, cols, () => 0);
+    }
+
+    function randomValue() {
+      return Math.floor(Math.random() * 9) + 1;
+    }
+
+    function key(r, c) {
+      return `${r},${c}`;
+    }
+
+    function id(name, r, c) {
+      return `${name}-${r}-${c}`;
+    }
+
+    function trailSteps() {
+      const inputCells = sim.m * sim.n + sim.n * sim.p;
+      return Math.max(8, Math.min(TRAIL_STEPS, Math.ceil(Math.sqrt(inputCells))));
+    }
+
+    function buildEvents() {
+      const ranges = { i: sim.m, j: sim.p, k: sim.n };
+      const events = [];
+
+      function walk(depth, idx) {
+        if (depth === 3) {
+          events.push({ i: idx.i, j: idx.j, k: idx.k });
+          return;
+        }
+
+        const axis = sim.order[depth];
+        for (let x = 0; x < ranges[axis]; x += 1) {
+          idx[axis] = x;
+          walk(depth + 1, idx);
+        }
+      }
+
+      walk(0, {});
+      return events;
+    }
+
+    function draw(el, data, name) {
+      const cols = data[0]?.length || 0;
+      el.style.gridTemplateColumns = `repeat(${cols}, var(--cell))`;
+      el.classList.toggle("tiny", Number(ui.cellSize.value) < 12);
+      el.innerHTML = "";
+
+      const frag = document.createDocumentFragment();
+      for (let r = 0; r < data.length; r += 1) {
+        for (let c = 0; c < cols; c += 1) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          cell.id = id(name, r, c);
+          cell.textContent = data[r][c];
+          cell.title = `${name}[${r},${c}] = ${data[r][c]}`;
+          frag.appendChild(cell);
+        }
+      }
+      el.appendChild(frag);
+    }
+
+    function setC(r, c) {
+      const cell = $(id("C", r, c));
+      if (!cell) return;
+      cell.textContent = sim.C[r][c];
+      cell.title = `C[${r},${c}] = ${sim.C[r][c]}`;
+      if (sim.done[r][c] === sim.n) cell.classList.add("done");
+      cell.classList.remove("flash");
+      void cell.offsetWidth;
+      cell.classList.add("flash");
+    }
+
+    function clearActives() {
+      document.querySelectorAll(".active-a,.active-b,.active-c").forEach((el) => {
+        el.classList.remove("active-a", "active-b", "active-c");
+      });
+    }
+
+    function active(i, j, k) {
+      clearActives();
+      $(id("A", i, k))?.classList.add("active-a");
+      $(id("B", k, j))?.classList.add("active-b");
+      $(id("C", i, j))?.classList.add("active-c");
+    }
+
+    function paintHeatMap(map, name, color, now) {
+      for (const [pos, mark] of map) {
+        const stepAge = sim.pos - mark.step;
+        const timeAge = now - mark.time;
+        const stepAlpha = 1 - stepAge / trailSteps();
+        const timeAlpha = 1 - timeAge / TRAIL_MS;
+        const alpha = Math.min(0.85, stepAlpha, timeAlpha);
+        const cell = $(name + "-" + pos.replace(",", "-"));
+
+        if (alpha <= 0.02) {
+          map.delete(pos);
+          if (cell) cell.style.background = "";
+        } else if (cell) {
+          cell.style.background = `rgba(${color},${alpha})`;
+        }
+      }
+    }
+
+    function paintHeat(now = performance.now()) {
+      paintHeatMap(sim.heatA, "A", "0,95,220", now);
+      paintHeatMap(sim.heatB, "B", "170,35,190", now);
+    }
+
+    function fadeHeat(now) {
+      paintHeat(now);
+      requestAnimationFrame(fadeHeat);
+    }
+
+    function status() {
+      const last = sim.last;
+      ui.shape.textContent = `A(${sim.m}x${sim.n}) * B(${sim.n}x${sim.p}) = C(${sim.m}x${sim.p})`;
+      ui.progress.textContent = `${sim.pos}/${sim.events.length}`;
+      ui.indices.textContent = last ? `i=${last.i} j=${last.j} k=${last.k}` : "i=- j=- k=-";
+      ui.op.textContent = last
+        ? `C[${last.i},${last.j}] += A[${last.i},${last.k}] * B[${last.k},${last.j}]`
+        : "idle";
+      ui.aShape.textContent = `${sim.m}x${sim.n}`;
+      ui.bShape.textContent = `${sim.n}x${sim.p}`;
+      ui.cShape.textContent = `${sim.m}x${sim.p}`;
+      ui.step.disabled = sim.pos >= sim.events.length;
+      ui.finish.disabled = sim.pos >= sim.events.length;
+      ui.play.textContent = sim.timer ? "pause" : "play";
+    }
+
+    function stop() {
+      if (!sim.timer) return;
+      cancelAnimationFrame(sim.timer);
+      sim.timer = 0;
+      sim.credit = 0;
+      sim.lastFrame = 0;
+      status();
+    }
+
+    function rebuild(randomize) {
+      stop();
+      sim.m = dim(ui.m);
+      sim.n = dim(ui.n);
+      sim.p = dim(ui.p);
+      sim.order = ui.order.value;
+      ui.m.value = sim.m;
+      ui.n.value = sim.n;
+      ui.p.value = sim.p;
+
+      if (randomize || sim.A.length !== sim.m || sim.A[0]?.length !== sim.n) {
+        sim.A = matrix(sim.m, sim.n, randomValue);
+      }
+
+      if (randomize || sim.B.length !== sim.n || sim.B[0]?.length !== sim.p) {
+        sim.B = matrix(sim.n, sim.p, randomValue);
+      }
+
+      sim.C = zeros(sim.m, sim.p);
+      sim.done = zeros(sim.m, sim.p);
+      sim.events = buildEvents();
+      sim.pos = 0;
+      sim.last = null;
+      sim.heatA.clear();
+      sim.heatB.clear();
+      clearActives();
+      draw(ui.A, sim.A, "A");
+      draw(ui.B, sim.B, "B");
+      draw(ui.C, sim.C, "C");
+      status();
+    }
+
+    function stepOnce() {
+      if (sim.pos >= sim.events.length) return false;
+      const { i, j, k } = sim.events[sim.pos];
+      sim.C[i][j] += sim.A[i][k] * sim.B[k][j];
+      sim.done[i][j] += 1;
+      sim.pos += 1;
+      sim.last = { i, j, k };
+      const now = performance.now();
+      sim.heatA.set(key(i, k), { step: sim.pos, time: now });
+      sim.heatB.set(key(k, j), { step: sim.pos, time: now });
+      paintHeat(now);
+      active(i, j, k);
+      setC(i, j);
+      return true;
+    }
+
+    function step(count) {
+      for (let x = 0; x < count; x += 1) {
+        if (!stepOnce()) break;
+      }
+      status();
+    }
+
+    function play() {
+      if (sim.timer) {
+        stop();
+        return;
+      }
+
+      function frame(now) {
+        if (!sim.lastFrame) sim.lastFrame = now;
+        const elapsed = Math.min(100, now - sim.lastFrame);
+        sim.lastFrame = now;
+        sim.credit += (Math.max(1, Number(ui.speed.value) || 1) * elapsed) / 1000;
+        const count = Math.floor(sim.credit);
+
+        if (count > 0) {
+          sim.credit -= count;
+          step(count);
+        }
+
+        if (sim.pos >= sim.events.length) stop();
+        else sim.timer = requestAnimationFrame(frame);
+      }
+
+      sim.timer = requestAnimationFrame(frame);
+      status();
+    }
+
+    function finish() {
+      stop();
+      while (stepOnce()) {}
+      status();
+    }
+
+    function setCellSize() {
+      document.documentElement.style.setProperty("--cell", ui.cellSize.value + "px");
+      ui.A.classList.toggle("tiny", Number(ui.cellSize.value) < 12);
+      ui.B.classList.toggle("tiny", Number(ui.cellSize.value) < 12);
+      ui.C.classList.toggle("tiny", Number(ui.cellSize.value) < 12);
+    }
+
+    ui.rebuild.addEventListener("click", () => rebuild(false));
+    ui.randomize.addEventListener("click", () => rebuild(true));
+    ui.step.addEventListener("click", () => step(1));
+    ui.play.addEventListener("click", play);
+    ui.finish.addEventListener("click", finish);
+    ui.cellSize.addEventListener("input", setCellSize);
+    ui.order.addEventListener("change", () => rebuild(false));
+    [ui.m, ui.n, ui.p].forEach((input) => input.addEventListener("change", () => rebuild(false)));
+
+    setCellSize();
+    rebuild(true);
+    requestAnimationFrame(fadeHeat);
+  </script>
+</body>
+</html>

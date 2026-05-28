@@ -147,6 +147,18 @@
       z-index: 1;
     }
 
+    .tile-a {
+      box-shadow: inset 0 0 0 2px rgba(0, 95, 220, 0.55);
+    }
+
+    .tile-b {
+      box-shadow: inset 0 0 0 2px rgba(170, 35, 190, 0.55);
+    }
+
+    .tile-c {
+      box-shadow: inset 0 0 0 2px rgba(230, 140, 0, 0.55);
+    }
+
     .done {
       background: #27a844 !important;
       color: #fff;
@@ -181,6 +193,17 @@
     <label>m <input id="m" type="number" min="1" max="128" value="16"></label>
     <label>n <input id="n" type="number" min="1" max="128" value="16"></label>
     <label>p <input id="p" type="number" min="1" max="128" value="16"></label>
+    <label>
+      variant
+      <select id="variant">
+        <option value="flat">flat</option>
+        <option value="tiled">tiled</option>
+      </select>
+    </label>
+    <label id="blockLabel" hidden>
+      block
+      <input id="block" type="number" min="1" max="64" value="4">
+    </label>
     <label>
       order
       <select id="order">
@@ -229,6 +252,9 @@
       m: $("m"),
       n: $("n"),
       p: $("p"),
+      variant: $("variant"),
+      block: $("block"),
+      blockLabel: $("blockLabel"),
       order: $("order"),
       cellSize: $("cellSize"),
       speed: $("speed"),
@@ -254,6 +280,8 @@
       n: 16,
       p: 16,
       order: "ijk",
+      variant: "flat",
+      block: 4,
       A: [],
       B: [],
       C: [],
@@ -302,25 +330,59 @@
       return Math.max(8, Math.min(TRAIL_STEPS, Math.ceil(Math.sqrt(inputCells))));
     }
 
-    function buildEvents() {
-      const ranges = { i: sim.m, j: sim.p, k: sim.n };
+    function blockSize() {
+      const maxBlock = Math.max(sim.m, sim.n, sim.p);
+      return Math.max(1, Math.min(maxBlock, Number(ui.block.value) || 1));
+    }
+
+    function walkOrder(depth, idx, bounds, events, tile) {
+      if (depth === 3) {
+        events.push({ i: idx.i, j: idx.j, k: idx.k, ...tile });
+        return;
+      }
+
+      const axis = sim.order[depth];
+      const [start, end] = bounds[axis];
+      for (let x = start; x < end; x += 1) {
+        idx[axis] = x;
+        walkOrder(depth + 1, idx, bounds, events, tile);
+      }
+    }
+
+    function buildEventsFlat() {
+      const bounds = {
+        i: [0, sim.m],
+        j: [0, sim.p],
+        k: [0, sim.n],
+      };
+      const events = [];
+      walkOrder(0, {}, bounds, events, {});
+      return events;
+    }
+
+    function buildEventsTiled() {
+      const bs = blockSize();
       const events = [];
 
-      function walk(depth, idx) {
-        if (depth === 3) {
-          events.push({ i: idx.i, j: idx.j, k: idx.k });
-          return;
-        }
-
-        const axis = sim.order[depth];
-        for (let x = 0; x < ranges[axis]; x += 1) {
-          idx[axis] = x;
-          walk(depth + 1, idx);
+      for (let II = 0; II < sim.m; II += bs) {
+        for (let JJ = 0; JJ < sim.p; JJ += bs) {
+          for (let KK = 0; KK < sim.n; KK += bs) {
+            const bounds = {
+              i: [II, Math.min(II + bs, sim.m)],
+              j: [JJ, Math.min(JJ + bs, sim.p)],
+              k: [KK, Math.min(KK + bs, sim.n)],
+            };
+            const tile = { II, JJ, KK, bs };
+            walkOrder(0, {}, bounds, events, tile);
+          }
         }
       }
 
-      walk(0, {});
       return events;
+    }
+
+    function buildEvents() {
+      return sim.variant === "tiled" ? buildEventsTiled() : buildEventsFlat();
     }
 
     function draw(el, data, name) {
@@ -355,16 +417,32 @@
     }
 
     function clearActives() {
-      document.querySelectorAll(".active-a,.active-b,.active-c").forEach((el) => {
-        el.classList.remove("active-a", "active-b", "active-c");
+      document.querySelectorAll(".active-a,.active-b,.active-c,.tile-a,.tile-b,.tile-c").forEach((el) => {
+        el.classList.remove("active-a", "active-b", "active-c", "tile-a", "tile-b", "tile-c");
       });
     }
 
-    function active(i, j, k) {
+    function markTile(name, r0, c0, rows, cols, cls) {
+      for (let r = r0; r < r0 + rows; r += 1) {
+        for (let c = c0; c < c0 + cols; c += 1) {
+          $(id(name, r, c))?.classList.add(cls);
+        }
+      }
+    }
+
+    function active(event) {
+      const { i, j, k } = event;
       clearActives();
       $(id("A", i, k))?.classList.add("active-a");
       $(id("B", k, j))?.classList.add("active-b");
       $(id("C", i, j))?.classList.add("active-c");
+
+      if (sim.variant !== "tiled") return;
+
+      const { II, JJ, KK, bs } = event;
+      markTile("A", II, KK, Math.min(bs, sim.m - II), Math.min(bs, sim.n - KK), "tile-a");
+      markTile("B", KK, JJ, Math.min(bs, sim.n - KK), Math.min(bs, sim.p - JJ), "tile-b");
+      markTile("C", II, JJ, Math.min(bs, sim.m - II), Math.min(bs, sim.p - JJ), "tile-c");
     }
 
     function paintHeatMap(map, name, color, now) {
@@ -399,7 +477,11 @@
       const last = sim.last;
       ui.shape.textContent = `A(${sim.m}x${sim.n}) * B(${sim.n}x${sim.p}) = C(${sim.m}x${sim.p})`;
       ui.progress.textContent = `${sim.pos}/${sim.events.length}`;
-      ui.indices.textContent = last ? `i=${last.i} j=${last.j} k=${last.k}` : "i=- j=- k=-";
+      ui.indices.textContent = last
+        ? sim.variant === "tiled"
+          ? `tile(${last.II},${last.JJ},${last.KK}) bs=${last.bs} i=${last.i} j=${last.j} k=${last.k}`
+          : `i=${last.i} j=${last.j} k=${last.k}`
+        : "i=- j=- k=-";
       ui.op.textContent = last
         ? `C[${last.i},${last.j}] += A[${last.i},${last.k}] * B[${last.k},${last.j}]`
         : "idle";
@@ -426,6 +508,9 @@
       sim.n = dim(ui.n);
       sim.p = dim(ui.p);
       sim.order = ui.order.value;
+      sim.variant = ui.variant.value;
+      sim.block = blockSize();
+      ui.block.value = sim.block;
       ui.m.value = sim.m;
       ui.n.value = sim.n;
       ui.p.value = sim.p;
@@ -454,16 +539,17 @@
 
     function stepOnce() {
       if (sim.pos >= sim.events.length) return false;
-      const { i, j, k } = sim.events[sim.pos];
+      const event = sim.events[sim.pos];
+      const { i, j, k } = event;
       sim.C[i][j] += sim.A[i][k] * sim.B[k][j];
       sim.done[i][j] += 1;
       sim.pos += 1;
-      sim.last = { i, j, k };
+      sim.last = event;
       const now = performance.now();
       sim.heatA.set(key(i, k), { step: sim.pos, time: now });
       sim.heatB.set(key(k, j), { step: sim.pos, time: now });
       paintHeat(now);
-      active(i, j, k);
+      active(sim.last);
       setC(i, j);
       return true;
     }
@@ -520,10 +606,21 @@
     ui.play.addEventListener("click", play);
     ui.finish.addEventListener("click", finish);
     ui.cellSize.addEventListener("input", setCellSize);
+    function syncVariantUi() {
+      const tiled = ui.variant.value === "tiled";
+      ui.blockLabel.hidden = !tiled;
+    }
+
     ui.order.addEventListener("change", () => rebuild(false));
+    ui.variant.addEventListener("change", () => {
+      syncVariantUi();
+      rebuild(false);
+    });
+    ui.block.addEventListener("change", () => rebuild(false));
     [ui.m, ui.n, ui.p].forEach((input) => input.addEventListener("change", () => rebuild(false)));
 
     setCellSize();
+    syncVariantUi();
     rebuild(true);
     requestAnimationFrame(fadeHeat);
   </script>

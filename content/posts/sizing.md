@@ -4,11 +4,11 @@ date: 2026-05-27T11:26:15+02:00
 draft: false
 ---
 
- <span style="font-size: 24px;">GPU</span> capacity planning is becoming critical: how many GPUs are needed to keep up with incoming workloads without causing delays or overprovisioning. The difficulty is that demand is rarely steady: requests arrive in bursts, job durations vary, and short spikes can quickly create queues even when average utilization looks acceptable.
+GPU capacity planning is becoming critical: how many GPUs are needed to keep up with incoming workloads without causing delays or overprovisioning. The difficulty is that demand is rarely steady: requests arrive in bursts, job durations vary, and short spikes can quickly create queues even when average utilization looks acceptable.
 
 A practical way to reason about this is to start with a simple closed-form lower bound that gives the minimum GPU requirement under idealized assumptions. From there, simulation can be used to introduce realism: arrival patterns, queueing effects, and workload variability. The goal is to understand how much additional capacity over the lower bound is needed in practice to achieve your service-level objectives.
 
-In this post, I'd like to give an overview of this methodology. Here's a toolkit that automates most of it: [howmanygpus.streamlit.app](https://howmanygpus.streamlit.app/).
+In this post, I'd like to give an overview of this methodology. Here's a toolkit that automates most of it: [howmanygpus.streamlit.app](https://howmanygpus.streamlit.app/)
 
 ## Start with model facts
 

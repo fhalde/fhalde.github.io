@@ -1,5 +1,5 @@
 ---
-title: "Sizing your LLM inference cluster"
+title: "Sizing Your LLM Inference Cluster"
 date: 2026-05-27T11:26:15+02:00
 draft: false
 ---

@@ -244,31 +244,27 @@ and the topology comfortably holds weights and expected KV:
 
 So the formulas say 12 GPUs is plausible but is at its limit: the requirement lands right on 12 and the binding resource is HBM bandwidth.
 
-Running the simulator over 60 seconds of traffic gives:
+Running the simulator over 300 seconds of traffic gives:
 
-- completed: 561 of 600 offered (~9.4 req/s)
-- p95 TTFT: about 310ms
-- p95 TPOT: about 30ms
-- p95 end-to-end latency: about 24s
+- completed: 2,981 of 3,000 offered (~9.9 req/s)
+- p95 TTFT: about 370ms
+- p95 TPOT: about 50ms
+- p95 end-to-end latency: about 38s
 - utilization: effectively 100%
 - preemptions: 0
 
-On their own these numbers do not actually say the system is keeping up.
+Goodput of ~9.9 req/s against the 10 offered – nearly every request clears – is what keeping up looks like: the queue is not running away.
 
-To know whether it keeps up, run longer. Extending to 120s and 180s, goodput settles at ~9.9 req/s against the offered 10, and the percentiles plateau (around 334ms TTFT, 38ms TPOT, 33s end-to-end). The queue is not growing, so 12 GPUs genuinely keeps up – with almost no headroom for bursts.
+Drop to 8 GPUs (TP=4, R=2), where the closed-form throughput requirement is no longer met:
 
-Drop to 8 GPUs (TP=4, R=2), where the closed-form throughput requirement is no longer met. The same 60-second run looks deceptively similar:
-
-- completed: 546 of 600 offered (~9.1 req/s)
-- p95 TTFT: about 520ms
-- p95 TPOT: about 100ms
-- p95 end-to-end latency: about 59s
+- completed: 1,869 of 3,000 offered (~6.2 req/s)
+- p95 TTFT: about 60s
+- p95 TPOT: about 155ms
+- p95 end-to-end latency: about 155s
 - utilization: effectively 100%
 - preemptions: 0
 
-At 60 seconds you might read this as the same regime, only slower. Run it longer and the gap is stark: goodput collapses to ~6 req/s while offered load stays at 10, and the tail grows without bound – p95 TTFT climbs from ~0.5s to ~10s to ~26s across 60s/120s/180s, and end-to-end latency from ~59s to ~117s. The backlog is accumulating.
-
-That is the real lesson of the example: a single short run cannot tell "saturated but stable" from "overloaded and diverging". You have to watch whether goodput tracks offered load and whether the latency tail plateaus or keeps climbing as the run lengthens.
+Now goodput sits far below the offered load: only ~6.2 of every 10 requests/sec actually complete, so a backlog builds for the whole run and the tail blows up into minutes as requests wait behind a queue that never drains.
 
 ## A practical workflow
 

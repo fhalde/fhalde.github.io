@@ -192,110 +192,77 @@ This gives a quick residency check. If \(K_{active/replica}\) is near or above \
 
 ## Why simulate?
 
-The formulas above are useful because they are fast and explainable. They are also intentionally optimistic.
+The formulas above are useful because they are fast and explainable. They are also intentionally optimistic. They assume arrivals are smooth at exactly \(\lambda\), prompt and output lengths are fixed at the mean, the decode batch is known ahead of time, queues never form, every replica is perfectly balanced, and KV pressure can be summarized by an average.
 
-They assume:
+Real traffic violates all of these. Arrivals bunch together, so a system that is fine on average can still miss p95. A few long generations can hold decode slots and KV long enough for shorter requests to queue behind them. Prompt and output lengths are not constants, they are **distributions**. The simulator exists to put those effects back in.
 
-- arrivals are smooth at exactly \(\lambda\) requests per second
-- prompt and output lengths are fixed at the mean
-- decode batch is known ahead of time
-- queues do not form
-- every replica receives perfectly balanced work
-- KV cache pressure can be summarized by an average
+## How the simulator works
 
-Real traffic violates all of these. A system that is fine on average can still miss p95 latency because arrivals bunch together. A few long generations can keep decode slots occupied long enough for shorter requests to queue behind them. Prompt and output lengths are not constants, they are **distributions**.
+The simulator is discrete-event, and deliberately a planning model rather than a reimplementation of vLLM or friends. It models the cluster as a set of replicas, each with a request queue, an in-flight decode batch capped at a maximum batch size, and the KV budget implied by its topology.
 
-This is where the simulator comes in.
+Requests arrive as a poisson process. Prompt and output lengths are drawn from lognormal distributions set by a mean and a variance factor.
 
-## The simulation model
+A replica then advances in cycles. On each cycle it admits at most one queued request, runs that request's prefill, then advances every in-flight sequence by one decode token. Two details drive most of the behavior:
 
-The toolkit simulator models a cluster as a set of replicas. Each replica has:
+- **Prefill and decode share the replica.** A long prompt's prefill briefly stalls the decode step for everything already running, which is how one request's prompt length leaks into other requests TPOT.
+- **Admission is optimistic.** A request is admitted if only the KV it needs to start fits right now. KV-cache growth during generation is reclaimed later. When live KV exceeds budget, the replica preempts newest-first: the victim's KV is dropped, its generated tokens are kept, and it resumes by recomputing context. A request whose context cannot fit even an empty replica is dropped outright.
 
-- a request queue
-- an active decode batch
-- a KV-cache budget
-- prefill timing from FLOPs
-- decode-step timing from the slower of compute and HBM bandwidth
+The payoff is that the simulator preserves the feedback loops the formulas hide: bursts create queues, long generations tie up slots and KV, prefill contends with decode, KV pressure triggers preemption and recompute, and tail latency degrades well before averages look alarming.
 
-Requests arrive according to a Poisson process, using exponential inter-arrival times. Prompt and output lengths are sampled from lognormal distributions parameterized by a mean and coefficient of variation. That coefficient of variation matters: a mean output length of 500 tokens with low variance is very different from a workload where many requests are short but a few are thousands of tokens.
+It reports the quantities that actually drive decisions, and each answers a different question:
 
-Each request is assigned to the least-loaded replica. A replica admits work into its batch when it has enough KV budget, runs prefill, then advances decode one token at a time for all active requests. If KV grows past budget, the simulator preempts newest requests first: their KV is dropped, generated tokens are kept, and they later resume by recomputing context.
-
-The outputs are the quantities that usually matter operationally:
-
-- p50/p95/p99 TTFT
-- p50/p95/p99 TPOT
-- p50/p95/p99 end-to-end latency
-- completed requests and goodput
-- utilization
-- queue depth over time
-- KV-cache occupancy
-- preemptions and drops
-- per-replica load balance
+- **TTFT** (p50/p95/p99): queueing and prefill pressure – how long until the first token.
+- **TPOT** (p50/p95/p99): decode pressure – how steady the stream is once it starts.
+- **End-to-end latency**: both of the above.
+- **Queue depth, KV occupancy, preemptions, drops**: why the latencies are moving.
+- **Utilization and per-replica balance**: whether there is burst headroom and whether routing is even.
 
 ## A worked example
 
-Consider the following setup (that I have the most experience with):
+Take the setup I have the most experience with:
 
 - model: Llama-3-70B, BF16
 - GPU: H100 80GB SXM
 - topology: TP=4, R=3, so 12 GPUs total
-- workload: 10 requests/sec
-- mean prompt: 1,000 tokens
-- mean output: 500 tokens
-- prompt and output CV: 0.5
-- assumed decode batch for the estimate: 32
+- workload: 10 requests/sec, mean prompt 1,000 tokens, mean output 500 tokens
+- prompt and output length spread/variance factor: 0.5
+- assumed decode batch: 32
 
 The closed-form estimate gives:
 
 - compute floor: about 6 GPUs
-- HBM bandwidth floor: about 12 GPUs
+- HBM bandwidth floor: about 11 GPUs
 - memory floor: about 7 GPUs
 - required throughput: 12 GPUs, bandwidth-bound
 
-The topology also fits weights and expected KV:
+and the topology comfortably holds weights and expected KV:
 
-- weights: about 140GB
-- KV per token: about 328KB
+- weights: about `140GB`
+- KV per token: about `328KB`
 - KV budget per 4-GPU replica: about 403k tokens
 - estimated in-flight KV per replica: about 38k tokens
 
-So the closed-form result says the 12-GPU layout is plausible, but close to the bandwidth floor.
+So the formulas say 12 GPUs is plausible but is at its limit: the requirement lands right on 12 and the binding resource is HBM bandwidth.
 
-Running the simulator for the same setup gives, for one seed:
+Running the simulator over 60 seconds of traffic gives:
 
-- p95 TTFT: about 309ms
+- p95 TTFT: about 310ms
 - p95 TPOT: about 30ms
 - p95 end-to-end latency: about 24s
 - utilization: effectively 100%
 - preemptions: 0
 
-The lesson is not that these numbers are universal. The lesson is that the closed-form estimate correctly identifies the binding resource and a plausible topology, while the simulator exposes the latency distribution and how much headroom remains.
+The reading is that the system is just keeping up. KV is not the constraint here – preemptions stay at zero because the 403k-token budget dwarfs the ~38k in flight – so the pressure shows up as throughput, not memory. The long p95 end-to-end is mostly 500 decode tokens at ~30ms each plus some queueing, and utilization is pinned, so there is almost no room for bursts. The closed form correctly identified the binding resource, the simulator shows how close to the edge the topology actually runs.
 
-If the same 4-GPU replica layout is reduced to 2 replicas, or 8 GPUs total, the closed-form throughput requirement is no longer met. In simulation, p95 TPOT jumps to roughly 100ms and p95 end-to-end latency grows substantially. The system still completes many requests, but a queue is rapidly accumulating.
-
-## Sweeps are often more useful than single points
-
-A single estimate answers one version of the workload. Planning usually needs a range.
-
-Useful sweeps include:
-
-- required GPUs vs request rate
-- required GPUs vs output length
-- compute-bound vs bandwidth-bound regions
-- p95 latency and goodput vs offered load
-
-The most useful plot is often latency vs offered load. The "knee" of that curve is where a small increase in requests/sec causes a large increase in p95 latency. That knee is a better capacity signal than average utilization alone.
-
-Utilization near 100% is not automatically bad for batch workloads, but for online inference it usually means there is little room for bursts. Once queues appear, TTFT and end-to-end latency can degrade very quickly.
+Drop to 8 GPUs (TP=4, R=2) and the closed-form throughput requirement is no longer met. In simulation, p95 TPOT rises to roughly 100ms, p95 end-to-end latency to about a minute, and fewer requests finish inside the window. Utilization is still 100%, but now the queue is growing rather than draining. The system is unstable.
 
 ## A practical workflow
 
 The workflow I like is:
 
 1. Pick the model, GPU, dtype, and rough efficiency assumptions.
-2. Estimate compute, bandwidth, and memory floors.
-3. Choose a topology that fits weights and has enough KV budget per replica.
-4. Simulate with realistic arrival rate, prompt length spread, and output length spread.
-5. Sweep request rate and output length to find the knee.
-6. Add enough headroom that p95 TTFT and TPOT stay within SLO during bursts.
+2. Estimate the compute, bandwidth, and memory floors.
+3. Choose a topology that fits weights and leaves enough KV budget per replica.
+4. Simulate at the real arrival rate and length spread, across a few seeds rather than one.
+5. Sweep arrival rate and output length to find the knee, not just the single operating point.
+6. Pick the smallest topology whose p95 TTFT and TPOT stay within SLO comfortably before that knee.

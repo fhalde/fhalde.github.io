@@ -246,15 +246,29 @@ So the formulas say 12 GPUs is plausible but is at its limit: the requirement la
 
 Running the simulator over 60 seconds of traffic gives:
 
+- completed: 561 of 600 offered (~9.4 req/s)
 - p95 TTFT: about 310ms
 - p95 TPOT: about 30ms
 - p95 end-to-end latency: about 24s
 - utilization: effectively 100%
 - preemptions: 0
 
-The reading is that the system is just keeping up. KV is not the constraint here – preemptions stay at zero because the 403k-token budget dwarfs the ~38k in flight – so the pressure shows up as throughput, not memory. The long p95 end-to-end is mostly 500 decode tokens at ~30ms each plus some queueing, and utilization is pinned, so there is almost no room for bursts. The closed form correctly identified the binding resource, the simulator shows how close to the edge the topology actually runs.
+On their own these numbers do not actually say the system is keeping up.
 
-Drop to 8 GPUs (TP=4, R=2) and the closed-form throughput requirement is no longer met. In simulation, p95 TPOT rises to roughly 100ms, p95 end-to-end latency to about a minute, and fewer requests finish inside the window. Utilization is still 100%, but now the queue is growing rather than draining. The system is unstable.
+To know whether it keeps up, run longer. Extending to 120s and 180s, goodput settles at ~9.9 req/s against the offered 10, and the percentiles plateau (around 334ms TTFT, 38ms TPOT, 33s end-to-end). The queue is not growing, so 12 GPUs genuinely keeps up – with almost no headroom for bursts.
+
+Drop to 8 GPUs (TP=4, R=2), where the closed-form throughput requirement is no longer met. The same 60-second run looks deceptively similar:
+
+- completed: 546 of 600 offered (~9.1 req/s)
+- p95 TTFT: about 520ms
+- p95 TPOT: about 100ms
+- p95 end-to-end latency: about 59s
+- utilization: effectively 100%
+- preemptions: 0
+
+At 60 seconds you might read this as the same regime, only slower. Run it longer and the gap is stark: goodput collapses to ~6 req/s while offered load stays at 10, and the tail grows without bound – p95 TTFT climbs from ~0.5s to ~10s to ~26s across 60s/120s/180s, and end-to-end latency from ~59s to ~117s. The backlog is accumulating.
+
+That is the real lesson of the example: a single short run cannot tell "saturated but stable" from "overloaded and diverging". You have to watch whether goodput tracks offered load and whether the latency tail plateaus or keeps climbing as the run lengthens.
 
 ## A practical workflow
 

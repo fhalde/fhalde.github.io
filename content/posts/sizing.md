@@ -68,15 +68,25 @@ F_{pre}(P) = 2NP + 4LP^2Hd_h
 
 The first term is the dense forward pass. The second term is prompt attention, which grows quadratically with prompt length.
 
-Decode compute for one generated token per sequence is approximately:
+Decode compute for one generated token in one sequence is approximately:
+
+\[
+F_{tok} \approx 2N
+\]
+
+If \(B\) is the decode batch size, the total compute for one batch step is:
 
 \[
 F_{step}(B) = 2NB
 \]
 
-where \(B\) is the batch size (number of sequences).
+Since one request generates \(O\) output tokens, its decode compute is:
 
-For aggregate request throughput, the per-request decode compute is \(2NO\), so the incoming useful compute per second is:
+\[
+F_{decode/request} = 2NO
+\]
+
+So the incoming useful compute per second is:
 
 \[
 F_{req/s} = \lambda \left(F_{pre}(P) + 2NO\right)
@@ -90,7 +100,7 @@ G_{compute}
 {F_{gpu} \cdot \mathrm{MFU}_{pre} \cdot \eta}
 \]
 
-This is a floor, not a deployment recommendation. It assumes steady average load and ignores queueing.
+Note: this is a floor, not a deployment recommendation. It assumes steady average load and ignores queueing.
 
 ## Decode bandwidth floor
 

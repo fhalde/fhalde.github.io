@@ -44,7 +44,7 @@ For Llama-3-70B in BF16:
 - weights are roughly `70B * 2 = 140GB`
 - KV cache is roughly `320KB` per token
 
-That means memory pressure is not only about loading the model. Long contexts and many in-flight requests can become the binding constraint.
+Both, weights and KV cache contribute to memory pressure.
 
 ## Compute floor
 
@@ -217,7 +217,7 @@ A replica then advances in cycles. On each cycle it admits at most one queued re
 
 The simulator captures queueing, decode/prefill contention, KV pressure, preemption, and recomputation, allowing tail latency effects to emerge naturally.
 
-It reports the quantities that actually drive decisions, and each answers a different question:
+The following metrics are captured by the simulator:
 
 - **TTFT** (p50/p95/p99): queueing and prefill pressure – how long until the first token.
 - **TPOT** (p50/p95/p99): decode pressure – how steady the stream is once it starts.
@@ -229,58 +229,63 @@ It reports the quantities that actually drive decisions, and each answers a diff
 
 Take the setup I have the most experience with:
 
-- model: Llama-3-70B, BF16
-- GPU: H100 80GB SXM
-- topology: TP=4, R=3, so 12 GPUs total
-- workload: 10 requests/sec, mean prompt 1,000 tokens, mean output 500 tokens
-- prompt and output length spread/variance factor: 0.5
-- assumed decode batch: 32
+| Input | Value |
+|---|---:|
+| Model | Llama-3-70B, BF16 |
+| GPU | H100 80GB SXM |
+| Topology | TP=4, R=3 |
+| Total GPUs | 12 |
+| Workload | 10 requests/sec |
+| Mean prompt | 1,000 tokens |
+| Mean output | 500 tokens |
+| Prompt/output spread | 0.5 CV |
+| Assumed decode batch | 32 |
 
 The closed-form estimate gives:
 
-- compute floor: about 6 GPUs
-- HBM bandwidth floor: about 11 GPUs
-- memory floor: about 7 GPUs
-- required throughput: 12 GPUs, bandwidth-bound
+| Estimate | Value |
+|---|---:|
+| Compute floor | 6 GPUs |
+| HBM bandwidth floor | 11 GPUs |
+| Memory floor | 7 GPUs |
+| Required throughput | 12 GPUs |
+| Bottleneck | HBM bandwidth |
 
 and the topology can hold the weights and expected KV:
 
-- weights: about `140GB`
-- KV per token: about `328KB`
-- KV budget per 4-GPU replica: about 403k tokens
-- estimated in-flight KV per replica: about 38k tokens
+| Residency check | Value |
+|---|---:|
+| Weights | `140GB` |
+| KV per token | `328KB` |
+| KV budget per 4-GPU replica | 403k tokens |
+| Estimated in-flight KV per replica | 38k tokens |
 
-So the formulas say 12 GPUs is plausible but is at its limit: the requirement lands right on 12 and the binding resource is HBM bandwidth.
+So the formulas say 12 GPUs is plausible but is at its limit.
 
 Running the simulator over 300 seconds of traffic gives:
 
-- completed: 2,981 of 3,000 offered (~9.9 req/s)
-- p95 TTFT: about 370ms
-- p95 TPOT: about 50ms
-- p95 end-to-end latency: about 38s
-- utilization: effectively 100%
-- preemptions: 0
+| Simulation result | 12 GPUs (TP=4, R=3) |
+|---|---:|
+| Completed | 2,981 of 3,000 offered |
+| Goodput | 9.9 req/s |
+| p95 TTFT | 370ms |
+| p95 TPOT | 50ms |
+| p95 end-to-end latency | 38s |
+| Utilization | effectively 100% |
+| Preemptions | 0 |
 
-Goodput of ~9.9 req/s against the 10 offered. No queuing.
+**Goodput of ~9.9 req/s against the 10 req/s offered. Incoming and outgoing rates are equal, thus there won't be any queuing.**
 
-Drop to 8 GPUs (TP=4, R=2), where the closed-form throughput requirement is no longer met:
+Let's look at a smaller topology of 8 GPUs (TP=4, R=2), where the closed-form throughput requirement is no longer met:
 
-- completed: 1,869 of 3,000 offered (~6.2 req/s)
-- p95 TTFT: about 60s
-- p95 TPOT: about 155ms
-- p95 end-to-end latency: about 155s
-- utilization: effectively 100%
-- preemptions: 0
+| Simulation result | 8 GPUs (TP=4, R=2) |
+|---|---:|
+| Completed | 1,869 of 3,000 offered |
+| Goodput | 6.2 req/s |
+| p95 TTFT | 60s |
+| p95 TPOT | 155ms |
+| p95 end-to-end latency | 155s |
+| Utilization | effectively 100% |
+| Preemptions | 0 |
 
-Now goodput sits far below the offered load: only ~6.2 of every 10 requests/sec are completing, so a backlog builds up as requests wait behind a queue that never drains.
-
-## A practical workflow
-
-The workflow I like is:
-
-1. Pick the model, GPU, dtype, and rough efficiency assumptions.
-2. Estimate the compute, bandwidth, and memory floors.
-3. Choose a topology that fits weights and leaves enough KV budget per replica.
-4. Simulate at the real arrival rate and length spread, across a few seeds rather than one.
-5. Sweep arrival rate and output length to find the knee, not just the single operating point.
-6. Pick the smallest topology whose p95 TTFT and TPOT stay within SLO comfortably before that knee.
+**The goodput is now under ~6.2 req/s, and will never catch up with the offered load of 10 req/s resulting in a growing backlog.**

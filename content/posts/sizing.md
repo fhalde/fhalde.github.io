@@ -58,7 +58,7 @@ Let:
 - \(H\): attention heads
 - \(F_{gpu}\): peak FLOPs/sec per GPU
 - \(\mathrm{MFU}_{pre}\): model FLOPs utilization during prefill
-- \(\eta\): parallelism efficiency
+- \(TP_{eff}\): tensor-parallel efficiency
 
 Prefill is approximately:
 
@@ -97,7 +97,7 @@ The compute floor is:
 \[
 G_{compute}
 = \frac{F_{req/s}}
-{F_{gpu} \cdot \mathrm{MFU}_{pre} \cdot \eta}
+{F_{gpu} \cdot \mathrm{MFU}_{pre} \cdot TP_{eff}}
 \]
 
 Note: this is a floor, not a deployment recommendation. It assumes steady average load and ignores queueing.
@@ -132,7 +132,7 @@ The bandwidth floor is:
 \[
 G_{bw}
 = \frac{\lambda O \cdot D_{tok}}
-{BW_{gpu} \cdot \mathrm{MBU} \cdot \eta}
+{BW_{gpu} \cdot \mathrm{MBU} \cdot TP_{eff}}
 \]
 
 The required throughput GPU count is the larger of the compute and bandwidth floors:

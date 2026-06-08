@@ -76,6 +76,8 @@ Decode compute for one generated token per sequence is approximately:
 F_{step}(B) = 2NB
 \]
 
+where \(B\) is the batch size (number of sequences).
+
 For aggregate request throughput, the per-request decode compute is \(2NO\), so the incoming useful compute per second is:
 
 \[

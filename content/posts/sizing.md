@@ -8,7 +8,7 @@ GPU capacity planning is becoming critical: how many GPUs are needed to keep up 
 
 A practical way to reason about this is to start with a simple closed-form lower bound that gives the minimum GPU requirement under idealized assumptions. From there, simulation can be used to introduce realism: arrival patterns, queueing effects, and workload variability. The goal is to understand how much additional capacity over the lower bound is needed in practice to achieve your service-level objectives.
 
-In this post, I'd like to give an overview of this methodology. Here's a toolkit that automates most of it: [howmanygpus.streamlit.app](https://howmanygpus.streamlit.app/)
+In this post, I'd like to give an overview of this methodology. Here's a toolkit that automates most of it: [howmanygpus](https://huggingface.co/spaces/faizhalde/howmanygpus)
 
 ## Start with model facts
 

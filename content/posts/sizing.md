@@ -133,8 +133,6 @@ The required throughput GPU count is the larger of the compute and bandwidth flo
 G_{required} = \left\lceil \max(G_{compute}, G_{bw}) \right\rceil
 \]
 
-This is often where an intuition check helps. Increasing decode batch can improve the bandwidth floor because it amortizes model-weight reads. Increasing context length does not get the same benefit because KV reads remain per sequence.
-
 ## Memory and topology
 
 Throughput floors tell us how many GPUs are needed in aggregate. They do not tell us whether a chosen topology can actually run the model.

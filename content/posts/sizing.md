@@ -200,14 +200,14 @@ Real traffic violates all of these. Arrivals bunch together, so a system that is
 
 The simulator is discrete-event, and deliberately a planning model rather than a reimplementation of vLLM or friends. It models the cluster as a set of replicas, each with a request queue, an in-flight decode batch capped at a maximum batch size, and the KV budget implied by its topology.
 
-Requests arrive as a poisson process. Prompt and output lengths are drawn from lognormal distributions set by a mean and a variance factor.
+Requests arrive as a poisson process. Prompt and output lengths are drawn from lognormal distributions (the toolkit will soon allow to provide your target distribution).
 
 A replica then advances in cycles. On each cycle it admits at most one queued request, runs that request's prefill, then advances every in-flight sequence by one decode token. Two details drive most of the behavior:
 
 - **Prefill and decode share the replica.** A long prompt's prefill briefly stalls the decode step for everything already running, which is how one request's prompt length leaks into other requests TPOT.
 - **Admission is optimistic.** A request is admitted if only the KV it needs to start fits right now. KV-cache growth during generation is reclaimed later. When live KV exceeds budget, the replica preempts newest-first: the victim's KV is dropped, its generated tokens are kept, and it resumes by recomputing context. A request whose context cannot fit even an empty replica is dropped outright.
 
-The payoff is that the simulator preserves the feedback loops the formulas hide: bursts create queues, long generations tie up slots and KV, prefill contends with decode, KV pressure triggers preemption and recompute, and tail latency degrades well before averages look alarming.
+The simulator captures queueing, decode/prefill contention, KV pressure, preemption, and recomputation, allowing tail latency effects to emerge naturally.
 
 It reports the quantities that actually drive decisions, and each answers a different question:
 

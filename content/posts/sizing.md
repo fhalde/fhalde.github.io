@@ -135,7 +135,7 @@ G_{required} = \left\lceil \max(G_{compute}, G_{bw}) \right\rceil
 
 ## Memory and topology
 
-Throughput floors tell us how many GPUs are needed in aggregate. They do not tell us whether a chosen topology can actually run the model.
+Throughput floors alone is insufficient, the topology must also fit weights and KV cache.
 
 Let:
 

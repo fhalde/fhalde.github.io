@@ -125,7 +125,7 @@ The HBM bytes read per output token are approximated as:
 D_{tok} = \frac{W}{B} + \bar{C} \cdot K_{tok}
 \]
 
-The first term is amortized model-weight bandwidth. The second term is KV-cache bandwidth, which is not divided by batch.
+The first term is amortized model-weight bandwidth. The second term is KV-cache bandwidth, which is unique to each sequence.
 
 The bandwidth floor is:
 
@@ -202,7 +202,7 @@ This gives a quick residency check. If \(K_{active/replica}\) is near or above \
 
 The formulas above are useful because they are fast and explainable. They are also intentionally optimistic. They assume arrivals are smooth at exactly \(\lambda\), prompt and output lengths are fixed at the mean, the decode batch is known ahead of time, queues never form, every replica is perfectly balanced, and KV pressure can be summarized by an average.
 
-Real traffic violates all of these. Arrivals bunch together, so a system that is fine on average can still miss p95. A few long generations can hold decode slots and KV long enough for shorter requests to queue behind them. Prompt and output lengths are not constants, they are **distributions**. The simulator exists to put those effects back in.
+Real traffic violates all of these. Arrivals bunch together, so a system that is fine on average can still miss p95. A few long generations can hold decode slots and KV long enough for shorter requests to queue behind them. Prompt and output lengths are not constants, they are **distributions**.
 
 ## How the simulator works
 
@@ -243,7 +243,7 @@ The closed-form estimate gives:
 - memory floor: about 7 GPUs
 - required throughput: 12 GPUs, bandwidth-bound
 
-and the topology comfortably holds weights and expected KV:
+and the topology can hold the weights and expected KV:
 
 - weights: about `140GB`
 - KV per token: about `328KB`
@@ -261,7 +261,7 @@ Running the simulator over 300 seconds of traffic gives:
 - utilization: effectively 100%
 - preemptions: 0
 
-Goodput of ~9.9 req/s against the 10 offered – nearly every request clears – is what keeping up looks like: the queue is not running away.
+Goodput of ~9.9 req/s against the 10 offered. No queuing.
 
 Drop to 8 GPUs (TP=4, R=2), where the closed-form throughput requirement is no longer met:
 
@@ -272,7 +272,7 @@ Drop to 8 GPUs (TP=4, R=2), where the closed-form throughput requirement is no l
 - utilization: effectively 100%
 - preemptions: 0
 
-Now goodput sits far below the offered load: only ~6.2 of every 10 requests/sec actually complete, so a backlog builds for the whole run and the tail blows up into minutes as requests wait behind a queue that never drains.
+Now goodput sits far below the offered load: only ~6.2 of every 10 requests/sec are completing, so a backlog builds up as requests wait behind a queue that never drains.
 
 ## A practical workflow
 

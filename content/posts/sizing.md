@@ -200,13 +200,13 @@ This gives a quick residency check. If \(K_{active/replica}\) is near or above \
 
 ## Why simulate?
 
-The formulas above are useful because they are fast and explainable. They are also intentionally optimistic. They assume arrivals are smooth at exactly \(\lambda\), prompt and output lengths are fixed at the mean, the decode batch is known ahead of time, queues never form, every replica is perfectly balanced, and KV pressure can be summarized by an average.
+The formulas above are useful because they are fast and explainable. They assume arrivals are smooth at exactly \(\lambda\), prompt and output lengths are fixed at the mean, the decode batch is known ahead of time, queues never form, every replica is perfectly balanced, and KV pressure can be summarized by an average.
 
-Real traffic violates all of these. Arrivals bunch together, so a system that is fine on average can still miss p95. A few long generations can hold decode slots and KV long enough for shorter requests to queue behind them. Prompt and output lengths are not constants, they are **distributions**.
+Real traffic violates all of these. Arrivals bunch together, so a system which is fine on average can still miss p95. A few long generations can hold decode slots and KV long enough for shorter requests to queue behind them. Prompt and output lengths are not constants, they are **distributions**.
 
 ## How the simulator works
 
-The simulator is discrete-event, and deliberately a planning model rather than a reimplementation of vLLM or friends. It models the cluster as a set of replicas, each with a request queue, an in-flight decode batch capped at a maximum batch size, and the KV budget implied by its topology.
+The simulator is discrete-event, and deliberately a planning model rather than a reimplementation of vLLM or friends. It models the cluster as a set of replicas (a replica is 1 loaded model instance), each with a request queue, an in-flight decode batch capped at a maximum batch size, and the KV budget implied by its topology.
 
 Requests arrive as a poisson process. Prompt and output lengths are drawn from lognormal distributions (the toolkit will soon allow to provide your target distribution).
 

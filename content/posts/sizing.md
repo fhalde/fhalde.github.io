@@ -37,7 +37,7 @@ The KV cache created by one token takes:
 K_{tok} = 2 \cdot L \cdot H_{kv} \cdot d_h \cdot b
 \]
 
-Here \(K_{tok}\) is measured in **bytes per token**. The factor of 2 is for keys and values. This formula is grouped-query-attention aware because it uses KV heads, not total attention heads – check out [Tensoreconomics](https://www.tensoreconomics.com/p/llm-inference-economics-from-first) for more details.
+Here \(K_{tok}\) is measured in **bytes per token**. The factor of 2 is for keys and values.
 
 For Llama-3-70B in BF16:
 

@@ -104,7 +104,7 @@ Note: this is a floor, not a deployment recommendation. It assumes steady averag
 
 ## Decode bandwidth floor
 
-Decode is often not limited by peak FLOPs. For each decode step, the GPU reads model weights and attends over the existing KV cache. Batching helps with the model-weight read because one weight read serves multiple sequences, but each sequence still has its own KV cache.
+Decode is often not limited by peak FLOPs. For each decode step, the GPU reads model weights and attends over the existing KV cache. Batching amortizes the cost of loading model weights across multiple sequences, but each sequence still maintains its own KV cache.
 
 Let:
 

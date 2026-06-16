@@ -21,8 +21,8 @@ Let:
 
 - \(N\): number of model parameters
 - \(L\): number of transformer layers
-- \(H_{kv}\): number of KV heads
-- \(d_h\): head dimension
+- \(H_{\mathrm{kv}}\): number of KV heads
+- \(d_{\mathrm{h}}\): head dimension
 - \(b\): bytes per value
 
 The model weights DRAM occupancy in bytes is:
@@ -34,10 +34,10 @@ W = N \cdot b
 The KV cache created by one token takes:
 
 \[
-K_{tok} = 2 \cdot L \cdot H_{kv} \cdot d_h \cdot b
+K_{\mathrm{tok}} = 2 \cdot L \cdot H_{\mathrm{kv}} \cdot d_{\mathrm{h}} \cdot b
 \]
 
-Here \(K_{tok}\) is measured in **bytes per token**. The factor of 2 is for keys and values.
+Here \(K_{\mathrm{tok}}\) is measured in **bytes per token**. The factor of 2 is for keys and values.
 
 For Llama-3-70B in BF16:
 
@@ -56,14 +56,14 @@ Let:
 - \(P\): mean prompt tokens
 - \(O\): mean output tokens
 - \(H\): attention heads
-- \(F_{gpu}\): peak FLOPs/sec per GPU
-- \(\mathrm{MFU}_{pre}\): model FLOPs utilization during prefill
-- \(TP_{eff}\): tensor-parallel efficiency
+- \(F_{\mathrm{gpu}}\): peak FLOPs/sec per GPU
+- \(\mathrm{MFU}_{\mathrm{pre}}\): model FLOPs utilization during prefill
+- \(\mathrm{TP}_{\mathrm{eff}}\): tensor-parallel efficiency
 
 Prefill is approximately:
 
 \[
-F_{pre}(P) = 2NP + 4LP^2Hd_h
+F_{\mathrm{pre}}(P) = 2NP + 4LP^2Hd_{\mathrm{h}}
 \]
 
 The first term is the dense forward pass. The second term is prompt attention, which grows quadratically with prompt length.
@@ -71,33 +71,33 @@ The first term is the dense forward pass. The second term is prompt attention, w
 Decode compute for one generated token in one sequence is approximately:
 
 \[
-F_{tok} \approx 2N
+F_{\mathrm{tok}} \approx 2N
 \]
 
 If \(B\) is the decode batch size, the total compute for one batch step is:
 
 \[
-F_{step}(B) = 2NB
+F_{\mathrm{step}}(B) = 2NB
 \]
 
 Since one request generates \(O\) output tokens, its decode compute is:
 
 \[
-F_{decode/request} = 2NO
+F_{\mathrm{decode/request}} = 2NO
 \]
 
 So the incoming useful compute per second is:
 
 \[
-F_{req/s} = \lambda \left(F_{pre}(P) + 2NO\right)
+F_{\mathrm{req/s}} = \lambda \left(F_{\mathrm{pre}}(P) + 2NO\right)
 \]
 
 The compute floor is:
 
 \[
-G_{compute}
-= \frac{F_{req/s}}
-{F_{gpu} \cdot \mathrm{MFU}_{pre} \cdot TP_{eff}}
+G_{\mathrm{compute}}
+= \frac{F_{\mathrm{req/s}}}
+{F_{\mathrm{gpu}} \cdot \mathrm{MFU}_{\mathrm{pre}} \cdot \mathrm{TP}_{\mathrm{eff}}}
 \]
 
 Note: this is a floor, not a deployment recommendation. It assumes steady average load and ignores queueing.
@@ -110,7 +110,7 @@ Let:
 
 - \(B\): assumed average decode batch
 - \(\bar{C}\): average decode context length
-- \(BW_{gpu}\): peak HBM bandwidth per GPU
+- \(\mathrm{BW}_{\mathrm{gpu}}\): peak HBM bandwidth per GPU
 - \(\mathrm{MBU}\): memory bandwidth utilization
 
 During generation, context grows from \(P\) to \(P + O\), so a useful approximation is:
@@ -122,7 +122,7 @@ During generation, context grows from \(P\) to \(P + O\), so a useful approximat
 The HBM bytes read per output token are approximated as:
 
 \[
-D_{tok} = \frac{W}{B} + \bar{C} \cdot K_{tok}
+D_{\mathrm{tok}} = \frac{W}{B} + \bar{C} \cdot K_{\mathrm{tok}}
 \]
 
 The first term is amortized model-weight bandwidth. The second term is KV-cache bandwidth, which is unique to each sequence.
@@ -130,15 +130,15 @@ The first term is amortized model-weight bandwidth. The second term is KV-cache 
 The bandwidth floor is:
 
 \[
-G_{bw}
-= \frac{\lambda O \cdot D_{tok}}
-{BW_{gpu} \cdot \mathrm{MBU} \cdot TP_{eff}}
+G_{\mathrm{bw}}
+= \frac{\lambda O \cdot D_{\mathrm{tok}}}
+{\mathrm{BW}_{\mathrm{gpu}} \cdot \mathrm{MBU} \cdot \mathrm{TP}_{\mathrm{eff}}}
 \]
 
 The required throughput GPU count is the larger of the compute and bandwidth floors:
 
 \[
-G_{required} = \left\lceil \max(G_{compute}, G_{bw}) \right\rceil
+G_{\mathrm{required}} = \left\lceil \max(G_{\mathrm{compute}}, G_{\mathrm{bw}}) \right\rceil
 \]
 
 ## Memory and topology
@@ -147,56 +147,56 @@ Throughput floors alone is insufficient, the topology must also fit weights and 
 
 Let:
 
-- \(M_{gpu}\): HBM bytes per GPU
+- \(M_{\mathrm{gpu}}\): HBM bytes per GPU
 - \(h\): usable HBM headroom
-- \(G_{r}\) = GPUs per replica/model instance
+- \(G_{\mathrm{r}}\) = GPUs per replica/model instance
 
 The minimum GPUs per replica needed to hold weights is:
 
 \[
-G_{r,min}
+G_{\mathrm{r,min}}
 = \left\lceil
-\frac{W}{M_{gpu} \cdot h}
+\frac{W}{M_{\mathrm{gpu}} \cdot h}
 \right\rceil
 \]
 
 Once weights are loaded, the remaining memory is the per-replica KV budget:
 
 \[
-K_{budget}
-= \frac{G_r \cdot M_{gpu} \cdot h - W}
-{K_{tok}}
+K_{\mathrm{budget}}
+= \frac{G_{\mathrm{r}} \cdot M_{\mathrm{gpu}} \cdot h - W}
+{K_{\mathrm{tok}}}
 \]
 
-Since the numerator is bytes and \(K_{tok}\) is bytes/token, \(K_{budget}\) is measured in **tokens**. This answers a very concrete question: after the weights are resident, how many active context tokens can this replica hold?
+\(K_{\mathrm{budget}}\) is measured in **tokens**.
 
 We can also estimate active KV using Little's law. If the no-queueing response time is approximately:
 
 \[
-T_{resp} \approx T_{pre} + O \cdot T_{step}
+T_{\mathrm{resp}} \approx T_{\mathrm{pre}} + O \cdot T_{\mathrm{step}}
 \]
 
 then expected in-flight requests are:
 
 \[
-Q = \lambda \cdot T_{resp}
+Q = \lambda \cdot T_{\mathrm{resp}}
 \]
 
 and active KV tokens are:
 
 \[
-K_{active} = Q \cdot \bar{C}
+K_{\mathrm{active}} = Q \cdot \bar{C}
 \]
 
 Spread across replicas:
 
 \[
-K_{active/replica} = \frac{K_{active}}{R}
+K_{\mathrm{active/replica}} = \frac{K_{\mathrm{active}}}{R}
 \]
 
-Both \(K_{active}\) and \(K_{active/replica}\) are also token counts.
+Both \(K_{\mathrm{active}}\) and \(K_{\mathrm{active/replica}}\) are also token counts.
 
-This gives a quick residency check. If \(K_{active/replica}\) is near or above \(K_{budget}\), the system will spend time under KV pressure, preempting, recomputing, queueing, or dropping requests whose contexts cannot fit.
+This gives a quick residency check. If \(K_{\mathrm{active/replica}}\) is near or above \(K_{\mathrm{budget}}\), the system will spend time under KV pressure, preempting, recomputing, queueing, or dropping requests whose contexts cannot fit.
 
 ## Why simulate?
 

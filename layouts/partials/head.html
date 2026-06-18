@@ -64,6 +64,11 @@
       background: #f6f8fa;
       font-weight: 600;
     }
+
+    .markdown-body :not(pre) > code {
+      color: #db222a;
+      font-weight: 700;
+    }
   </style>
 
   {{ range .Site.Params.extraCSSFiles -}}

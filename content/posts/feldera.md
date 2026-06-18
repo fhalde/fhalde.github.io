@@ -39,21 +39,16 @@ When the query is submitted, it returns rows from the middle zone. A naive IVM t
 
 ## How Feldera resolves this
 
-Feldera makes time an explicit input. Time itself is represented as a input table.
+Feldera makes time an explicit input — but you don't manage it yourself.
+
+Internally, the compiler declares a system table `NOW`:
 
 ```sql
 CREATE TABLE NOW(now TIMESTAMP NOT NULL); -- LATENESS INTERVAL 0 SECONDS
 ```
 
-This is a system table declared in the [DBSPCompiler](https://github.com/feldera/feldera/blob/b4e0c383b13aaa4980dec015a61efb23fb53a3af/sql-to-dbsp-compiler/SQL-compiler/src/main/java/org/dbsp/sqlCompiler/compiler/DBSPCompiler.java#L242). It holds a single row with a single column: the current time.
+It is injected by the [DBSPCompiler](https://github.com/feldera/feldera/blob/main/sql-to-dbsp-compiler/SQL-compiler/src/main/java/org/dbsp/sqlCompiler/compiler/DBSPCompiler.java#L242) & updated by the pipeline. `NOW()` returns the timestamp for the current pipeline step. A step runs when new data arrives, or on a timer controlled by `clock_resolution_usecs`.
 
-Unlike a clock that keeps advancing forward on its own, this one requires someone ticks it. We are responsible for generating those ticks choosing the granularity – tick too frequently and performance suffers, any less and the results become stale.
+> `clock_resolution_usecs` parameter controls the execution of queries that use the `NOW()` function. The output of such queries depends on the real-time clock and can change over time without any external inputs
 
-With time modeled this way, the moving-window behavior becomes trivial:
-
-```sql
-SELECT * FROM purchase
-WHERE ts >= NOW() - INTERVAL 7 DAYS;
-```
-
-As you tick the clock forward (by writing new timestamps into `NOW()`), Feldera emits incremental changes – including deletions for rows that have fallen out of the 7-day window.
+Now that time is an input table, moving windows fit DBSP's change-stream model.

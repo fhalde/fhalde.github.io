@@ -21,7 +21,21 @@ In a traditional setup, this query would run on a schedule – maybe once a day.
 
 An incremental engine however is long running. You submit the query once. So when should `NOW()` resolve? If it's evaluated at the time of submission, a day later "the last 7 days" is still pinned to yesterday's clock & the window never moves.
 
-This behavior in my opinion is consistent as far as SQL is concerned. The expectation that the window should move has nothing to do with SQL. In a batch system, the repeated schedule implicitly re-evaluates `NOW()` on every run. In other words, part of the users intent lives outside of the SQL statement itself – in the execution model surrounding it.
+This behavior in my opinion is consistent as far as SQL is concerned. The expectation that the window should move has nothing to do with SQL. In a batch system, the repeated schedule implicitly re-evaluates `NOW()` on every run. In other words, part of the users intent lives outside of the SQL statement itself – in the orchestration layer around it.
+
+For e.g.
+
+Imagine your database rows are partitioned into three zones:
+
+- **middle**: `row.ts` between `now` and `now - 7 days`
+- **left**: `row.ts < now - 7 days`
+- **right**: `row.ts > now`
+
+![Three zones of rows](/posts/img1.svg)
+
+When the query is submitted, it returns rows from the middle zone. A naive IVM that resolves `NOW()` once at submission time keeps refreshing that same fixed window forever – reacting only when rows in that zone are inserted, updated, or deleted.
+
+![Three zones of rows](/posts/img2.svg)
 
 ## How Feldera resolves this
 

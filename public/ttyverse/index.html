@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="ttyverse — a 3D workspace for interactive terminals.">
+<title>ttyverse</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#f7f7f4;--fg:#151515;--muted:#777;--line:#deded8}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{width:min(980px,calc(100% - 40px));min-height:100vh;margin:auto;display:flex;flex-direction:column}
+nav{height:76px;display:flex;align-items:center;justify-content:space-between;font-size:14px}
+.logo{font-weight:700;letter-spacing:-.03em}a{color:inherit;text-decoration:none}nav a:last-child{color:var(--muted)}
+.hero{flex:1;display:grid;grid-template-columns:.9fr 1.1fr;gap:70px;align-items:center;padding:60px 0 110px}
+h1{font-size:clamp(58px,8vw,90px);line-height:.94;letter-spacing:-.065em;margin:0 0 24px}
+p{color:var(--muted);font-size:18px;line-height:1.55;margin:0 0 28px;max-width:390px}
+.links{display:flex;gap:20px;font-size:14px;font-weight:600}.links a{border-bottom:1px solid;padding-bottom:2px}
+
+.scene{position:relative;height:430px;perspective:1000px}
+.term{position:absolute;border-radius:10px;overflow:hidden;box-shadow:0 22px 50px #0002;transition:transform .35s ease}
+.term:hover{z-index:5}
+.t1{width:370px;right:35px;top:88px;background:#17211c;color:#dce9df;border:1px solid #26352c;transform:rotateY(-9deg) rotateX(3deg)}
+.t1:hover{transform:rotateY(-4deg) rotateX(1deg) translateY(-4px)}
+.t2{width:290px;left:10px;top:12px;background:#1c1d2b;color:#e3e3f4;border:1px solid #303249;transform:rotateY(10deg) rotateZ(-2deg) scale(.96);opacity:.96}
+.t2:hover{transform:rotateY(5deg) rotateZ(-1deg) translateY(-4px) scale(.98)}
+.t3{width:265px;left:54px;bottom:5px;background:#2b1d19;color:#f4e2da;border:1px solid #493029;transform:rotateY(8deg) rotateZ(2deg) scale(.93);opacity:.94}
+.t3:hover{transform:rotateY(3deg) rotateZ(1deg) translateY(-4px) scale(.96)}
+
+.bar{height:35px;border-bottom:1px solid #ffffff12;padding:10px 12px;font:11px ui-monospace,SFMono-Regular,Menlo,monospace;opacity:.55}
+.screen{padding:16px;font:12px/1.75 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.dim{opacity:.45}.green{color:#9fca9f}.purple{color:#b9a7e8}.orange{color:#e9a27f}
+.cursor{display:inline-block;width:7px;height:13px;background:currentColor;vertical-align:-2px;animation:b 1.1s steps(1) infinite}@keyframes b{50%{opacity:0}}
+footer{height:64px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px}
+
+@media(max-width:760px){
+ .hero{grid-template-columns:1fr;gap:35px;padding:55px 0 80px}
+ .scene{height:360px;order:-1}
+ .t1{width:330px;right:0;top:80px}.t2{width:245px;left:0}.t3{width:230px;left:25px}
+}
+</style>
+</head>
+<body><main>
+<nav><a class="logo" href="#">ttyverse</a><a href="https://github.com/">GitHub ↗</a></nav>
+<section class="hero">
+<div>
+<h1>Your terminals,<br>in space.</h1>
+<p>A 3D workspace for organizing, navigating and interacting with multiple terminals.</p>
+<div class="links"><a href="https://github.com/">View on GitHub</a><a href="https://github.com/">Get started →</a></div>
+</div>
+<div class="scene">
+<div class="term t2"><div class="bar">tests</div><div class="screen"><div><span class="dim">❯</span> cargo test</div><div class="dim">running 18 tests</div><div class="purple">18 passed</div></div></div>
+<div class="term t1"><div class="bar">~/code/ttyverse</div><div class="screen"><div><span class="dim">❯</span> cargo run</div><div class="dim">Finished dev profile</div><br><div><span class="dim">❯</span> git status</div><div class="green">On branch main</div><br><div><span class="dim">❯</span> <span class="cursor"></span></div></div></div>
+<div class="term t3"><div class="bar">server</div><div class="screen"><div><span class="dim">❯</span> pnpm dev</div><div class="dim">localhost:5173</div><div class="orange">ready in 421ms</div></div></div>
+</div>
+</section>
+<footer><span>ttyverse</span><span>open source</span></footer>
+</main></body></html>

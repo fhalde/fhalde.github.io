@@ -14,8 +14,11 @@ The issue, as I see it, is that these dashboards are remarkably good at showing 
 
 RCA is then an exercise done by engineers, carefully reasoning over the metrics and piecing together a plausible story. While I get the appeal of playing "detective", it is generally error prone. Surely machines know how to learn by now?
 
-# Demo
+# Can we do better?
 
+Exploring this idea led me to [Causal Machine Learning](https://medium.com/causality-in-data-science/what-is-causal-machine-learning-ceb480fd2902), more specifically to the [DoWhy](https://www.pywhy.org/dowhy/v0.10.1/index.html) library. Let's put it into action.
+
+Metrics are, after all, just a superimposition of many different effects which CausalML can help peel apart.
 ```mermaid
 graph LR
       Campaign --> Traffic
@@ -33,13 +36,20 @@ graph LR
       DBLoad --> Latency
 ```
 
-The benefits of such a system are several.
+![superimpose](/posts/superimpose.svg)
+
+
+There are several benefits in having such a system.
+
+### Automatic Remediation
+### Smart paging / manageable on-calls
+### Better postmortems
+### Enabling SRE
 
 ### Makes on-call more manageable
 Enterprises are forced into an awkward trade-off: keep rotations fine-grained, with every team carrying its own on-call burden, or consolidate them into fewer rotations. The former is expensive (hourly wage is a thing in some countries) & the latter is more anxiety-inducing for whoever gets paged. If we can reliably narrow down the cause of an incident, on-call becomes a much nicer experience. It also creates a stronger foundation for automatic remediations as there's less ambiguity about the cause.
 
 ### Enables SRE
-
 
 SRE[^sre], when implemented poorly, has a fundamental problem: you centralize the responsibility for responding to incidents without centralizing the knowledge required to understand them. A hundred dashboards don't magically give an SRE the application-level context they need to make sense of an ongoing incident.
 

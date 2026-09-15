@@ -16,18 +16,33 @@ RCA is then an exercise done by engineers, carefully reasoning over the metrics 
 
 # Demo
 
-<traffic>
-<query plan diagnosis>
+```mermaid
+graph LR
+      Campaign --> Traffic
+      Traffic --> CPU
+      Traffic --> DBLoad
+      Deployment --> CPU
+      Deployment --> DBLoad
+
+      subgraph Backend["Service backend"]
+          CPU
+          DBLoad["DB load"]
+      end
+
+      CPU --> Latency
+      DBLoad --> Latency
+```
 
 The benefits of such a system are several.
 
 ### Makes on-call more manageable
 Enterprises are forced into an awkward trade-off: keep rotations fine-grained, with every team carrying its own on-call burden, or consolidate them into fewer rotations. The former is expensive (hourly wage is a thing in some countries) & the latter is more anxiety-inducing for whoever gets paged. If we can reliably narrow down the cause of an incident, on-call becomes a much nicer experience. It also creates a stronger foundation for automatic remediations as there's less ambiguity about the cause.
 
-### Enables SRE[^sre].
+### Enables SRE
+
+
+SRE[^sre], when implemented poorly, has a fundamental problem: you centralize the responsibility for responding to incidents without centralizing the knowledge required to understand them. A hundred dashboards don't magically give an SRE the application-level context they need to make sense of an ongoing incident.
 
 [^sre]: [Site Reliability Engineering](https://sre.google/)
-
-SRE, when implemented poorly, has a fundamental problem: you centralize the responsibility for responding to incidents without centralizing the knowledge required to understand them. A hundred dashboards don't magically give an SRE the application-level context they need to make sense of an ongoing incident.
 
 I hope this has intrigued you enough to question whether our current approach to observability is really state of the art. Surely, what we need isn't yet another time-series database.

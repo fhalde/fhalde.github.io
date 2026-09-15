@@ -100,4 +100,33 @@
 
   {{ if .Site.Params.TwitterCards }}{{ template "_internal/twitter_cards.html" . }}{{ end }}
   {{ .Site.Params.extraHead | safeHTML }}
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      flowchart: { curve: 'linear' },
+      theme: 'base',
+      themeVariables: {
+        fontFamily: getComputedStyle(document.body).fontFamily,
+        background: '#ffffff',
+        primaryColor: '#f6f8fa',
+        primaryTextColor: '#000000',
+        primaryBorderColor: '#db222a',
+        secondaryColor: '#ffffff',
+        secondaryTextColor: '#000000',
+        secondaryBorderColor: '#d0d7de',
+        tertiaryColor: '#f6f8fa',
+        tertiaryTextColor: '#000000',
+        tertiaryBorderColor: '#d0d7de',
+        lineColor: '#57606a',
+        textColor: '#000000',
+        clusterBkg: '#f6f8fa',
+        clusterBorder: '#d0d7de',
+        edgeLabelBackground: '#ffffff',
+        noteBkgColor: '#f6f8fa',
+        noteTextColor: '#000000',
+        noteBorderColor: '#d0d7de',
+      },
+    });
+  </script>
 </head>

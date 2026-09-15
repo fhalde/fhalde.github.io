@@ -4,7 +4,7 @@ date: 2026-09-13T11:16:25+02:00
 draft: true
 ---
 
-Observability usually starts with the same ritual: figure out what can go wrong, decide which signals might tell us when it does, put them on a dashboard, and wire up some alerts. The usual suspects: RUM, RED, USE, HTTPxx codes, latency percentiles, RPS, CPU %, memory usage, the trifecta of load averages [1m/5m/15m], packet drops. Yes, the packet drops.
+Observability usually starts with the same ritual: figure out what can go wrong, decide which signals might tell us when it does, put them on a dashboard, and wire up some alerts. The usual suspects: RUM, RED, USE, HTTPxx codes, latency percentiles, RPS, CPU %, memory usage, the load avg trifecta [1m/5m/15m], packet drops. Yes, the packet drops.
 
 Given this vast amount of telemetry – an average enterprise produces terabytes of telemetry per day[^observability-crisis] – why do we still struggle to answer even the most basic questions about an incident?
 
@@ -16,9 +16,14 @@ RCA is then an exercise done by engineers, carefully reasoning over the metrics 
 
 # Can we do better?
 
-Exploring this idea led me to [Causal Machine Learning](https://medium.com/causality-in-data-science/what-is-causal-machine-learning-ceb480fd2902), more specifically to the [DoWhy](https://www.pywhy.org/dowhy/v0.10.1/index.html) library. Let's put it into action.
+I started looking into [Causal Machine Learning](https://medium.com/causality-in-data-science/why-machine-learning-needs-causality-3d33e512cd37) and to my luck, some good folks at Microsoft and AWS have already done much of the heavy lifting through [DoWhy](https://www.pywhy.org/dowhy/v0.10.1/index.html) and its Graphical Causal Model (GCM) framework.
 
-Metrics are, after all, just a superimposition of many different effects which CausalML can help peel apart.
+Imagine you own a standard three-tier web app. A normal day looks like this:
+![all-good](/posts/normal.png)
+
+Then, one day, you are staring at this.
+![all-good](/posts/incident.png)
+
 ```mermaid
 graph LR
       Campaign --> Traffic
@@ -35,6 +40,7 @@ graph LR
       CPU --> Latency
       DBLoad --> Latency
 ```
+Metrics are, after all, just a superimposition of many different effects which CausalML can help peel apart.
 
 ![superimpose](/posts/superimpose.svg)
 

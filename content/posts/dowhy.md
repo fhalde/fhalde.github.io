@@ -37,8 +37,14 @@ Once again, there's the same spike in traffic. Latency also shifted though not n
 
 So how does one tell them apart? In the first incident, you'd want to investigate the deployment. In the second incident, you can safely ignore it and look elsewhere.
 
-These are exactly the kinds of questions Causal ML can answer.
+# Hello DoWhy
 
+### Causal Graph
+A causal graph is a DAG describing the cause-and-effect relationships between different variables. DoWhy has an experimental [Graphical causal model](https://www.pywhy.org/dowhy/main/user_guide/gcm_based_inference/introduction.html) based inference which is what we're gonna use.
+
+The graph gives the model a structure to work with. Domain experts in your organization can encode what they know about the system's relationships over time.
+
+For the example above, here's a causal graph that should be fairly self-explanatory.
 ```mermaid
 graph LR
       Campaign --> Traffic
@@ -55,10 +61,15 @@ graph LR
       CPU --> Latency
       DBLoad --> Latency
 ```
+> A campaign may influence traffic, which in turn affects CPU usage and database load. A deployment can also affect CPU and database load independently of traffic. Both CPU usage and database load contribute to the request latency.
+
+One can imagine in an organizational setting, individual teams could build and maintain causal graphs for the systems they understand best. A platform team could then stitch these graphs together into an organization-wide view, allowing outages to be reasoned about across service and team boundaries if desirable.
+
+Let's now look at what DoWhy has to say about the two incidents. We'll use the [Distribution Change](https://www.pywhy.org/dowhy/main/user_guide/causal_tasks/root_causing_and_explaining/distribution_change.html) recipe for this.
+
 Metrics are, after all, just a superimposition of many different effects which CausalML can help peel apart.
 
 ![superimpose](/posts/superimpose.svg)
-
 
 There are several benefits in having such a system.
 

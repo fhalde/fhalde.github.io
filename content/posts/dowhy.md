@@ -16,13 +16,28 @@ RCA is then an exercise done by engineers, carefully reasoning over the metrics 
 
 # Can we do better?
 
-I started looking into [Causal Machine Learning](https://medium.com/causality-in-data-science/why-machine-learning-needs-causality-3d33e512cd37) and to my luck, some good folks at Microsoft and AWS have already done much of the heavy lifting through [DoWhy](https://www.pywhy.org/dowhy/v0.10.1/index.html) and its Graphical Causal Model (GCM) framework.
+While looking for solutions, I came across [Causal Machine Learning](https://medium.com/causality-in-data-science/why-machine-learning-needs-causality-3d33e512cd37) which looked promising, and to my luck, some good folks at Microsoft and AWS have already done much of the heavy lifting in the [DoWhy](https://www.pywhy.org/dowhy/v0.10.1/index.html) library. Their documentation does an excellent job of showcasing practical applications of causal modeling, check it out!
 
-Imagine you own a standard three-tier web app. A normal day looks like this:
+To put DoWhy into practice, imagine you're running a standard three-tier web app – frontend, backend, database.
+
+On a normal day, your operations look something like this:
 ![all-good](/posts/normal.png)
 
-Then, one day, you are staring at this.
-![all-good](/posts/incident.png)
+Then, one day, you are staring at this:
+![all-bad](/posts/incident.png)
+
+Let me point out that this is already a pretty decent dashboard. Alongside the usual metrics, it captures ongoing events such as the start of a campaign or a new deployment thus giving you valuable context for what was happening in the system that may have caused the incident.
+
+But even then, the dashboard isn't actionable. Did the deployment introduce a regression? Or is this simply what the system looks like under this level of traffic?
+
+Here's another scenario. Let's make the same deployment w/o the bug while keeping everything else unchanged.
+![strange](/posts/cdnoregress.png)
+
+Once again, there's the same spike in traffic. Latency also shifted though not nearly as much as before. The campaign and deployment took place just as they did in the previous incident. Yet this time, the deployment has no bug.
+
+So how does one tell them apart? In the first incident, you'd want to investigate the deployment. In the second incident, you can safely ignore it and look elsewhere.
+
+These are exactly the kinds of questions Causal ML can answer.
 
 ```mermaid
 graph LR

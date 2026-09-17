@@ -23,26 +23,26 @@ To put DoWhy into practice, imagine you're running a standard three-tier web app
 On a normal day, your operations look something like this:
 <figure style="text-align: center">
   <img src="/posts/normal.png" alt="Dashboard showing normal system operation">
-  <figcaption style="font-size: 15px">Figure 1: Normal system operation</figcaption>
+  <figcaption style="font-size: 15px">Fig. 1: Normal system operation</figcaption>
 </figure>
 
-Then, one day, you’re staring at this, with no idea whether the deployment introduced a regression or not:
+Then, one day, you’re staring at this (you don't know yet if the deployment had a regression)
 <figure id="incident-with-regression" style="text-align: center">
   <img src="/posts/incident.png" alt="Dashboard showing the incident with a deployment regression">
-  <figcaption style="font-size: 15px">Figure 2: Campaign and deployment with a regression</figcaption>
+  <figcaption style="font-size: 15px">Fig. 2: Campaign and deployment with a regression</figcaption>
 </figure>
 
 Let me point out that this is already a pretty decent dashboard. Alongside the usual metrics, it captures ongoing events such as the start of a campaign or a new deployment thus giving you valuable context for what was happening in the system that may have caused the incident.
 
 The dashboard however doesn't tell us which explanation to favor: Did the deployment introduce a regression? Or is this simply what the system would look like at this level of traffic?
 
-Here's another deployment without the bug while keeping everything else unchanged.
+Here's another deployment without the regression while keeping everything else unchanged.
 <figure id="incident-without-regression" style="text-align: center">
   <img src="/posts/cdnoregress.png" alt="Dashboard showing the campaign and deployment without a regression">
-  <figcaption style="font-size: 15px">Figure 3: Campaign and deployment without a regression</figcaption>
+  <figcaption style="font-size: 15px">Fig. 3: Campaign and deployment without a regression</figcaption>
 </figure>
 
-Once again, there's the same spike in traffic. Latency also shifted though not nearly as much as before. The campaign and deployment took place just as they did in the previous incident. Yet this time, the deployment has no bug.
+Once again, there's the same spike in traffic. Latency also shifted though not nearly as much as before. The campaign and deployment took place just as they did in the previous incident. Yet this time, the deployment has no regression.
 
 So how does one tell them apart? In the first incident, you'd want to investigate the deployment. In the second incident, you can safely ignore it and look elsewhere.
 
@@ -74,47 +74,56 @@ Let's now look at what DoWhy has to say about the two incidents. We'll use the [
 
 Apart from pointing to potential causes, it can also attribute the change in a variable (e.g., latency) back to the nodes in the causal graph that contributed to it, and also quantify how much each one was responsible for.
 
+The following summarizes the distribution change, attributing the overall increase in latency across the contributing nodes. Notice that it doesn't single out a single root cause.
+
 <figure style="text-align: center">
   <img src="/posts/regressionattr.png" alt="Attribution of the latency change in the incident with a regression">
-  <figcaption style="font-size: 15px">Figure 4: Latency change attribution for <a href="#incident-with-regression">fig(2)</a></figcaption>
+  <figcaption style="font-size: 15px">Fig. 4: Latency change attribution for <a href="#incident-with-regression">Fig. 2</a></figcaption>
 </figure>
+
+We know from Fig. 2 that mean latency increased by 100ms. In the second experiment (Fig. 3), we know the deployment introduced no regression, leaving the campaign as the source of the latency increase. The model attributed roughly 34ms to the campaign in both experiments, making the remaining 66ms in the first experiment consistent with the deployment regression.
+
+CPU usage increased in both cases, but it was never the root cause: adding capacity might have relieved the symptom, but fixing the regression is what would have resolved the underlying problem.
 
 <figure style="text-align: center">
   <img src="/posts/noregressionattr.png" alt="Attribution of the latency change in the incident without a regression">
-  <figcaption style="font-size: 15px">Figure 5: Latency change attribution for <a href="#incident-without-regression">fig(3)</a></figcaption>
+  <figcaption style="font-size: 15px">Fig. 5: Latency change attribution for <a href="#incident-without-regression">Fig. 3</a></figcaption>
 </figure>
 
-# Advantages
+### Footguns
+
+Causal ML is still a tool and the literature is explicit about the possibility of surprising or misleading results. In our example, imagine the deployment itself had no regression, but there was a hidden factor affecting CPU usage (e.g., power saver mode) that wasn't defined in our causal graph. The model could still end up attributing the resulting change back to the deployment.
+
+I'd recommend reading about [Confounders, Colliders, Mediators](https://medium.com/causality-in-data-science/confounding-colliding-d-separation-and-sleeping-with-shoes-on-8ba43c976354).
+
+That doesn't make the approach unusable. We can continuously revise the graphs as we better understand what impacts our systems, add more telemetry, and use canary deployments to give the model a baseline to compare the rollout against.
+
+# Benefits
 
 ### Automatic remediation
 
-In our example, the same latency alert can have two different action items: investigate a release or accommodate more traffic. Rolling back a healthy deployment won't make the campaign go away. Adding capacity might help with the regression, but you're basically paying for the bug.
+In our example, the same latency alert can have two different action items: investigate a release or accommodate more traffic. Rolling back a healthy deployment won't make the campaign go away. Adding capacity might help with the regression, but you're basically paying for the regression.
 
 Attribution could help choose the correct remedy..
 
-### Makes on-call more manageable
+### Manageable on-calls and better postmortems
 
 Enterprises face an awkward trade-off: keep rotations fine-grained, with every team carrying its own on-call burden, or consolidate them into fewer rotations. The former is expensive (hourly wage is a thing in some countries), the latter puts unfamiliar systems in front of whoever gets paged.
 
 If attribution can narrow down the likely source, we could page the team best placed to investigate and include the reasoning.
 
-### Better postmortems
-
-After the incident, we'd also have an explanation to examine alongside the timeline. Did the suspected deployment actually cause the problem? Did rolling it back produce the improvement we expected? What did the model miss?
-
-A wrong prediction by the model may hint us that we don't understand our system better. It also could simply be wrong. Human judgement still needed.
-
 ### SRE
-
-Steve Yegge once argued that only a company like Google could really pull off SRE. Given Google's work in this area, perhaps causal reasoning is one such prerequisite for making the SRE model even work.
+Steve Yegge once argued that only a company like Google could really pull off SRE[^sre]. Perhaps causal reasoning is one of the tools that can make the SRE model practical beyond companies with Google-scale operational expertise.
 
 [^sre]: [Site Reliability Engineering](https://sre.google/)
 
 # Conclusion
 
-This demo is small and used synthetic data. Production systems might require more work: relationships change, signals are missing, and the model can be wrong. Still, the possibility of turning telemetry and domain knowledge into an explanation is a useful capability.
+This demo is small and used synthetic data. Production systems might require more work. Still, the possibility of turning telemetry and domain knowledge into an explanation is a useful capability.
 
 I hope this has intrigued you enough to question whether our current approach to observability is really state-of-the-art. Surely, what we need isn't a yet another time-series database.
+
+HMU if you think I've got anything wrong here `:)`
 
 ---
 #### _Behind the Scenes_
@@ -130,34 +139,25 @@ def samples(
     campaign: bool = False,
     campaign_multiplier: float = 2.0,
     deployment: bool = False,
-    bug: bool = False,
+    regression: bool = False,
 ) -> pd.Dataframe:
-    """
-    Args:
-       n: Number of samples to generate.
-       campaign: Whether a marketing campaign is active.
-       campaign_multiplier: Traffic multiplier during a campaign.
-       deployment: Whether it is a deployment.
-       bug: Whether the deployment introduces a bug.
-    """
     campaign_effect = np.full(n, campaign_multiplier if campaign else 1.0)
     traffic = rng.normal(100, 8, n) * campaign_effect
 
     deployed = np.full(n, 1.0 if deployment else 0.0)
 
-    # traffic naturally raises cpu.
+    # traffic naturally raises cpu
     cpu = 15 + 0.3 * traffic + rng.normal(0, 3, n)
 
-    # new deployment adds extra cpu overhead. (synthetic, so we know!)
-    if deployment and bug:
+    # new deployment adds extra cpu overhead (synthetic, so we know!)
+    if deployment and regression:
         cpu += 35 + rng.normal(0, 2, n)
 
     cpu = np.clip(cpu, 0, 100)
 
-    # db load mostly follows traffic.
+    # db load mostly follows traffic
     db_load = 20 + 0.28 * traffic + rng.normal(0, 3, n)
 
-    # normal latency effects.
     latency = (
         50
         + 2.0 * cpu
@@ -174,11 +174,9 @@ def samples(
         "latency": latency,
     })
 
-fig(1): sample(100, rng, campaign=False, campaign_multipler=None, deployment=False, bug=False)
-fig(2): sample(100, rng, campaign=True,  campaign_multipler=1.4,  deployment=True,  bug=True)
-fig(3): sample(100, rng, campaign=True,  campaign_multipler=1.4,  deployment=True,  bug=False)
+Fig. 1: sample(100, rng, campaign=False, campaign_multipler=None, deployment=False, regression=False)
+Fig. 2: sample(100, rng, campaign=True,  campaign_multipler=1.4,  deployment=True,  regression=True)
+Fig. 3: sample(100, rng, campaign=True,  campaign_multipler=1.4,  deployment=True,  regression=False)
 ```
 
-None of this logic is visible to the CausalML model. It only sees the generated observations and the causal graph.
-
-
+FWIW this knowledge/relations were completely invisible to the CausalML model. It learns from the generated observations and the causal graph.

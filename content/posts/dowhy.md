@@ -86,26 +86,40 @@ The following summarizes the distribution change DoWhy predicts for Fig. 2. Noti
   <figcaption style="font-size: 15px">Fig. 4: Latency change attribution for <a href="#incident-with-regression">Fig. 2</a></figcaption>
 </figure>
 
-We know from Fig. 2 that our **mean latency** increased by 100ms. In the second experiment, Fig. 3, we know the deployment introduced no regression, leaving the campaign as the only source of the latency increase. The model attributed roughly 34ms to the campaign in both experiments, making the remaining 66ms in the first experiment consistent with the deployment regression.
+We know from Fig. 2 that our **mean latency** increased by roughly 100ms. The model attributes about 67ms to the deployment and 34ms to the campaign.
 
-CPU usage increased in both cases, but it was never the root cause: adding capacity might have relieved the symptom, but fixing the regression is what would have resolved the underlying problem.
+What happens when the deployment introduces no regression? Here's the attribution for the second experiment, Fig. 3.
 
 <figure style="text-align: center">
   <img src="/posts/noregressionattr.png" alt="Attribution of the latency change in the incident without a regression">
   <figcaption style="font-size: 15px">Fig. 5: Latency change attribution for <a href="#incident-without-regression">Fig. 3</a></figcaption>
 </figure>
 
-Apart from that, DoWhy also provides what causal ML calls intervention. Knowing the root causes is great, but engineers ultimately need to fix the situation. Intervention helps us answer "what-if" kinds of questions. For example, "what-if we vertically scaled the service and reduced CPU utilization to X%, how much would we expect latency to improve?". Now that's valuable!
+The campaign contributes roughly 34ms in both experiments. The deployment adds about 67ms in the first, but almost nothing in the second.
+
+CPU usage increased in both cases, but it was never the root cause: adding capacity might have relieved the symptom, but
+fixing the regression is what would have resolved the underlying problem.
+
+Apart from that, DoWhy also provides what causal ML calls **intervention**. Knowing the root causes is great, but engineers ultimately need to fix the situation. Intervention helps us answer "what-if" kinds of questions. For example, "what-if we vertically scaled the service and reduced CPU utilization to X%, how much would we expect latency to improve?". Now that's valuable!
 
 #### Footguns
 
-Causal ML is still a tool and the literature is clear about the possibility of surprising or misleading results. Going back to our example, imagine the deployment never had a regression, but there was a hidden factor affecting CPU usage (e.g., power saver mode) that wasn't defined in our graph. The model could still end up attributing the latency effects back to the deployment.
+Causal ML is still a tool and the literature is clear about the possibility of surprising or misleading results if you aren't being careful. Going back to our example, imagine the deployment never had a regression, but there was a hidden factor affecting CPU usage (e.g., power saver mode) that wasn't modelled in our graph. It would still end up attributing the latency effects back to the deployment.
 
 On this topic, I'd recommend reading about [Confounders, Colliders, Mediators](https://medium.com/causality-in-data-science/confounding-colliding-d-separation-and-sleeping-with-shoes-on-8ba43c976354).
 
 That doesn't make the approach unusable. We can continuously revise the graphs as we better understand what impacts our systems, add more telemetry, and use canary deployments to give the model a baseline to compare the rollout against.
 
-You may also have a case where a node feeds itself for example, latency 
+You may also have feedback loops, for example, the classic Retry Storms. A DAG cannot contain cycles, but we can represent this across time by unrolling the DAG a few timesteps:
+
+```mermaid
+graph LR
+    L0["Latency[now]"] --> R1["Retries[now+5m]"]
+    R1 --> T1["Traffic[now+5m]"]
+    T1 --> L1["Latency[now+5m]"]
+    L1 --> R2["Retries[now+10m]"]
+```
+
 ## Applications
 
 #### Cloud FinOps
@@ -118,19 +132,19 @@ This one has been particularly painful & seems like a good fit for causal attrib
 
 #### Automatic remediation
 
-In our example, the same latency alert can have two different action items: investigate a release or accommodate more traffic. Rolling back a healthy deployment won't make the campaign go away. Adding capacity might help with the regression, but you're paying for the regression.
+In our example, the same latency alert can have two different action items: investigate a release or accommodate more traffic. Rolling back a healthy deployment won't make the campaign go away. Adding capacity might help, but you're paying for the regression.
 
-Attribution could help choose the correct remedy.
+Causal attribution could help choose the right action.
 
 #### Manageable on-calls and better postmortems
 
-Enterprises face an awkward trade-off: keep rotations fine-grained, with every team carrying its own on-call burden, or consolidate them into fewer rotations. The former is expensive (hourly wage is a thing in some countries), the latter puts unfamiliar systems in front of whoever gets paged.
+Enterprises face an awkward trade-off: keep rotations fine-grained, with every team carrying its own on-call burden, or consolidate them into fewer rotations. The former is expensive (hourly wage is a thing in some countries), the latter puts unfamiliar systems in front of you increasing on-call anxiety.
 
-If attribution can narrow down the likely source, we could page the team best placed to investigate and include the reasoning.
+If causal attribution can narrow down the likely source, you've got free money.
 
 ## Closing Thoughts
 
-This demo was deliberately small and used synthetic data. Applying to production systems might require more work. Still, the possibility of turning telemetry and domain knowledge into an explanation is a useful capability.
+This demo was deliberately small and used synthetic data. Applying it to production systems might require more work. Still, the possibility of turning telemetry and domain knowledge into an explanation is a useful capability.
 
 I hope this has intrigued you enough to question whether our current approach to observability is really state-of-the-art. Surely, what we need isn't yet another time-series database.
 

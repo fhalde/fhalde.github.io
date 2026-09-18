@@ -132,7 +132,6 @@ The synthetic data was generated with the following Python function, which retur
 
 ```python
 def samples(
-    self,
     n: int,
     rng: np.random.Generator,
     *,
@@ -174,9 +173,9 @@ def samples(
         "latency": latency,
     })
 
-Fig. 1: sample(100, rng, campaign=False, campaign_multipler=None, deployment=False, regression=False)
-Fig. 2: sample(100, rng, campaign=True,  campaign_multipler=1.4,  deployment=True,  regression=True)
-Fig. 3: sample(100, rng, campaign=True,  campaign_multipler=1.4,  deployment=True,  regression=False)
+Fig. 1: sample(100, rng, campaign=False, campaign_multiplier=None, deployment=False, regression=False)
+Fig. 2: sample(100, rng, campaign=True,  campaign_multiplier=1.4,  deployment=True,  regression=True)
+Fig. 3: sample(100, rng, campaign=True,  campaign_multiplier=1.4,  deployment=True,  regression=False)
 ```
 
-FWIW this knowledge/relations were completely invisible to the CausalML model. It learns from the generated observations and the causal graph.
+The model never sees this generator code. It learns from the generated observations and the causal graph.

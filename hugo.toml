@@ -4,6 +4,9 @@ title = 'Faiz Halde'
 subtitle = 'takeaways'
 theme = 'yinyang'
 
+[services.googleAnalytics]
+  ID = 'G-TLXL3S92ZJ'
+
 [markup]
   [markup.goldmark]
     [markup.goldmark.extensions]

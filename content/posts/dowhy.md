@@ -1,32 +1,34 @@
 ---
-title: "Logs, metrics, traces & still no answers"
+title: "Logs, metrics, traces and still no answers"
 date: 2026-09-13T11:16:25+02:00
 draft: true
 ---
 
-Observability usually starts with the same ritual: figure out what can go wrong, decide which signals might tell us when it does, put them on a dashboard, and wire up some alerts. The usual suspects: RUM, RED, USE, HTTPxx codes, latency percentiles, RPS, CPU %, memory usage, the load avg trifecta [1m/5m/15m], packet drops. Yes, the packet drops.
+The practice of observability in organizations hasn't changed much: anticipate possible failures, monitor the signals, and wire up alerts. The usual suspects: RUM, RED, USE, HTTPxx codes, latency percentiles, RPS, CPU %, memory usage, the load avg trifecta [1m/5m/15m].
 
-Given this vast amount of telemetry – an average enterprise produces terabytes of telemetry per day[^observability-crisis] – why do we still struggle to answer even the most basic questions about an incident?
+Yet, despite this vast amount of telemetry – an average enterprise produces terabytes of telemetry per day[^observability-crisis] – why do we still struggle to answer even the most basic questions about an incident?
 
 [^observability-crisis]: [The Observability Cost Crisis](https://www.practicallogix.com/the-observability-cost-crisis-why-84-of-enterprises-are-drowning-in-telemetry-and-how-opentelemetry-is-forcing-a-reckoning)
 
-The issue, as I see it, is that these dashboards are remarkably good at showing us symptoms, but not causes. It's funny how almost everything on the chart just correlates! It also doesn't help that, in production, "too many" things are happening at once. For example, somebody decides to run a marketing campaign that causes a surge in traffic right around the time a new deployment introduces a regression. What caused the latency spike?
+The issue, as I see it, is that these dashboards are good at showing us symptoms, but not causes. Almost everything on the chart correlates! It also doesn't help that, in production, "too many" things are happening at once. A marketing campaign might cause a surge in traffic right around the time a new deployment introduces a regression.  What caused the latency spike?
 
 RCA is then an exercise done by engineers, carefully reasoning over the metrics and piecing together a plausible story. While I get the appeal of playing "detective", it is generally error prone. Surely machines know how to learn by now?
 
 # Can we do better?
 
-While looking for a better way to reason about incidents, I came across [Causal Machine Learning](https://medium.com/causality-in-data-science/why-machine-learning-needs-causality-3d33e512cd37) which looked promising, and to my luck, some good folks at Microsoft and AWS have already done much of the heavy lifting in the [DoWhy](https://www.pywhy.org/dowhy/v0.10.1/index.html) library. The documentation does an excellent job of showcasing practical applications of causal modeling, check it out!
+While looking for a better way to reason about incidents, I came across [Causal Machine Learning](https://medium.com/causality-in-data-science/why-machine-learning-needs-causality-3d33e512cd37) which looked promising, and to my luck, some good folks at Microsoft and AWS have already done much of the heavy lifting in a library called [DoWhy](https://www.pywhy.org/dowhy/v0.10.1/index.html). The documentation does an excellent job of showcasing practical applications of causal modeling, check it out!
 
 To put DoWhy into practice, imagine you're running a standard three-tier web app – frontend, backend, database.
 
-On a normal day, your operations look something like this:
+On a normal day at some hour of the day, your operations look something like this:
 <figure style="text-align: center">
   <img src="/posts/normal.png" alt="Dashboard showing normal system operation">
   <figcaption style="font-size: 15px">Fig. 1: Normal system operation</figcaption>
 </figure>
 
-Then, one day, you’re staring at this (you don't know yet if the deployment had a regression)
+> _all data generated is synthetic to prove DoWhy, check out [Behind the Scenes below](#behind-the-scenes)_
+
+Then, one day, you’re staring at this
 <figure id="incident-with-regression" style="text-align: center">
   <img src="/posts/incident.png" alt="Dashboard showing the incident with a deployment regression">
   <figcaption style="font-size: 15px">Fig. 2: Campaign and deployment with a regression</figcaption>
@@ -42,9 +44,9 @@ Here's another deployment without the regression while keeping everything else u
   <figcaption style="font-size: 15px">Fig. 3: Campaign and deployment without a regression</figcaption>
 </figure>
 
-Once again, there's the same spike in traffic. Latency also shifted though not nearly as much as before. The campaign and deployment took place just as they did in the previous incident. Yet this time, the deployment has no regression.
+Once again, there's the same spike in traffic. Latency also shifted though not nearly as much as before. The campaign and deployment took place just as they did in the previous incident. Yet this time, the deployment has no regression. This already gives you some clue about the relationships, but remember: in production, we don't get to simply flip the toggles and observe what happens.
 
-So how does one tell them apart? In the first incident, you'd want to investigate the deployment. In the second incident, you can safely ignore it and look elsewhere.
+So how does one tell them apart? In the first incident, you'd want to investigate the deployment. In the second incident, you could've safely ignored the deployment and looked elsewhere.
 
 # Hello DoWhy
 
@@ -53,7 +55,7 @@ A causal graph is a DAG describing the cause-and-effect relationships between di
 
 The graph gives the model a structure to work with. Domain experts in your organization can encode what they know about the system's relationships over time.
 
-For the example above, here's a causal graph that should be fairly self-explanatory.
+Here's a causal graph for our example which should be fairly self-explanatory.
 ```mermaid
 graph LR
       Campaign --> Traffic
@@ -66,7 +68,7 @@ graph LR
 ```
 <p style="font-size: 15px" align="center"><em>A campaign may influence traffic, which in turn affects CPU usage and database load. A deployment can also affect CPU and database load independently of traffic. Both CPU usage and database load contribute to the request latency.</em></p>
 
-One can imagine in a large organization, individual teams could build and maintain causal graphs for the systems they understand best. A platform team could then stitch these graphs together into an organization-wide view, allowing outages to be reasoned about across service and team boundaries if desirable.
+One can imagine in a large organization, individual teams could build and maintain causal graphs for the systems they understand best. A platform team could compose them together into an organization-wide view, allowing outages to be reasoned about across service and team boundaries if desirable.
 
 Let's now look at what DoWhy has to say about the two incidents. We'll use the [Distribution Change](https://www.pywhy.org/dowhy/main/user_guide/causal_tasks/root_causing_and_explaining/distribution_change.html) recipe for this. The question it answers is:
 
@@ -92,19 +94,27 @@ CPU usage increased in both cases, but it was never the root cause: adding capac
 
 ### Footguns
 
-Causal ML is still a tool and the literature is explicit about the possibility of surprising or misleading results. In our example, imagine the deployment itself had no regression, but there was a hidden factor affecting CPU usage (e.g., power saver mode) that wasn't defined in our causal graph. The model could still end up attributing the resulting change back to the deployment.
+Causal ML is still a tool and the literature is clear about the possibility of surprising or misleading results. Going back to our example, imagine the deployment never had a regression, but there was a hidden factor affecting CPU usage (e.g., power saver mode) that wasn't defined in our graph. The model could still end up attributing the latency effects back to the deployment.
 
-I'd recommend reading about [Confounders, Colliders, Mediators](https://medium.com/causality-in-data-science/confounding-colliding-d-separation-and-sleeping-with-shoes-on-8ba43c976354).
+On this topic, I'd recommend reading about [Confounders, Colliders, Mediators](https://medium.com/causality-in-data-science/confounding-colliding-d-separation-and-sleeping-with-shoes-on-8ba43c976354).
 
 That doesn't make the approach unusable. We can continuously revise the graphs as we better understand what impacts our systems, add more telemetry, and use canary deployments to give the model a baseline to compare the rollout against.
 
-# Benefits
+# Applications
+
+### Cost Analysis
+
+Why did my AWS cost sheet grow?
+
+### Debugging slow queries
+
+Huge gap, pg metrics are plentiful
 
 ### Automatic remediation
 
-In our example, the same latency alert can have two different action items: investigate a release or accommodate more traffic. Rolling back a healthy deployment won't make the campaign go away. Adding capacity might help with the regression, but you're basically paying for the regression.
+In our example, the same latency alert can have two different action items: investigate a release or accommodate more traffic. Rolling back a healthy deployment won't make the campaign go away. Adding capacity might help with the regression, but you're paying for the regression.
 
-Attribution could help choose the correct remedy..
+Attribution could help choose the correct remedy.
 
 ### Manageable on-calls and better postmortems
 
@@ -112,16 +122,18 @@ Enterprises face an awkward trade-off: keep rotations fine-grained, with every t
 
 If attribution can narrow down the likely source, we could page the team best placed to investigate and include the reasoning.
 
-### SRE
-Steve Yegge once argued that only a company like Google could really pull off SRE[^sre]. Perhaps causal reasoning is one of the tools that can make the SRE model practical beyond companies with Google-scale operational expertise.
+# Closing Thoughts
 
-[^sre]: [Site Reliability Engineering](https://sre.google/)
+Causal ML doesn't stop at attribution, you can also intervene, letting you ask 'what if?' questions: What if I vertically scaled my machine to bring down the CPU usage? How would that affect latency?
 
-# Conclusion
+I'd suggest reading:
 
-This demo is small and used synthetic data. Production systems might require more work. Still, the possibility of turning telemetry and domain knowledge into an explanation is a useful capability.
+- [Causal Inference and Discovery in Python](https://www.oreilly.com/library/view/causal-inference-and/9781804612989/)
+- [The Book of Why](https://www.goodreads.com/en/book/show/36204378-the-book-of-why)
 
-I hope this has intrigued you enough to question whether our current approach to observability is really state-of-the-art. Surely, what we need isn't a yet another time-series database.
+This demo was deliberately small and uses synthetic data. Applying to production systems might require more work. Still, the possibility of turning telemetry and domain knowledge into an explanation is a useful capability.
+
+I hope this has intrigued you enough to question whether our current approach to observability is really state-of-the-art. Surely, what we need isn't yet another time-series database.
 
 HMU if you think I've got anything wrong here `:)`
 

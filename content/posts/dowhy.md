@@ -102,15 +102,7 @@ fixing the regression is what would have resolved the underlying problem.
 
 Apart from that, DoWhy also provides what causal ML calls **intervention**. Knowing the root causes is great, but engineers ultimately need to fix the situation. Intervention helps us answer "what-if" kinds of questions. For example, "what-if we vertically scaled the service and reduced CPU utilization to X%, how much would we expect latency to improve?". Now that's valuable!
 
-#### Footguns
-
-Causal ML is still a tool and the literature is clear about the possibility of surprising or misleading results if you aren't being careful. Going back to our example, imagine the deployment never had a regression, but there was a hidden factor affecting CPU usage (e.g., power saver mode) that wasn't modelled in our graph. It would still end up attributing the latency effects back to the deployment.
-
-On this topic, I'd recommend reading about [Confounders, Colliders, Mediators](https://medium.com/causality-in-data-science/confounding-colliding-d-separation-and-sleeping-with-shoes-on-8ba43c976354).
-
-That doesn't make the approach unusable. We can continuously revise the graphs as we better understand what impacts our systems, add more telemetry, and use canary deployments to give the model a baseline to compare the rollout against.
-
-You may also have feedback loops, for example, the classic Retry Storms. A DAG cannot contain cycles, but we can represent this across time by unrolling the DAG a few timesteps:
+A limitation of DAG however is feedback loops, for example, the classic Retry Storms. A DAG cannot contain cycles, but we can represent this across time by unrolling the DAG a few timesteps (at-least that's what the documentation suggests):
 
 ```mermaid
 graph LR
@@ -120,6 +112,14 @@ graph LR
     L1 --> R2["Retries[now+10m]"]
 ```
 
+#### Footguns
+
+Causal ML is still a tool and the literature is clear about the possibility of surprising or misleading results if you aren't being careful. Going back to our example, imagine the deployment never had a regression, but there was a hidden factor affecting CPU usage (e.g., power saver mode) that wasn't modelled in our graph. It would still end up attributing the latency effects back to the deployment.
+
+On this topic, I'd recommend reading about [Confounders, Colliders, Mediators](https://medium.com/causality-in-data-science/confounding-colliding-d-separation-and-sleeping-with-shoes-on-8ba43c976354).
+
+That doesn't make the approach unusable. We can continuously revise the graphs as we better understand what impacts our systems, add more telemetry, and use canary deployments to give the model a baseline to compare the rollout against.
+
 ## Applications
 
 #### Cloud FinOps
@@ -128,7 +128,7 @@ Suppose your AWS bill jumps by 30% this month. Was it the increase in traffic? A
 
 #### Debugging slow queries
 
-This one has been particularly painful & seems like a good fit for causal attribution. Instead of showing which metrics moved alongside a slow query, a causal model could estimate how much each of those changes (CPU and I/O pressure, buffer cache hits/misses, lock waits, scan size, sorting) actually contributed to the slowdown.
+This one has been particularly painful & seems like a good fit for causal attribution. Instead of showing which metrics moved alongside a slow query, a causal model could estimate how much each of those changes (CPU and I/O pressure, buffer cache hits/misses, lock waits, scan size, sorting) actually contributed to the slowdown instead of trial-and-error which is often the norm.
 
 #### Automatic remediation
 

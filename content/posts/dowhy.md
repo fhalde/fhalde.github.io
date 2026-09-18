@@ -12,7 +12,7 @@ Yet, despite this vast amount of telemetry – an average enterprise produces te
 
 The issue, as I see it, is that these dashboards are good at showing us symptoms, but not causes. Almost everything on the chart will often correlate. It also doesn't help that, in production, "too many" things happen at once. A marketing campaign might cause a surge in traffic exactly when a new deployment introduced a regression. What caused the latency spike?
 
-Engineers then carefully reason over the metrics and piece together a plausible RCA. While I get the appeal of playing "detective", it is generally error prone. Surely machines know how to learn by now?
+Engineers then carefully reason over the metrics and piece together a Root Cause Analysis (RCA). While I get the appeal of playing "detective", it is generally error prone. Surely machines know how to learn by now?
 
 ## Can we do better?
 
@@ -20,7 +20,7 @@ While looking for a better way to reason about incidents, I came across [Causal 
 
 To put DoWhy into practice, imagine you're running a simple three-tier web app – frontend, backend, database.
 
-On a normal day at some hour of the day, your operations look something like this:
+On a normal day at some hour, your operations look something like this:
 <figure style="text-align: center">
   <img src="/posts/normal.png" alt="Dashboard showing normal system operation">
   <figcaption style="font-size: 15px">Fig. 1: Normal system operation</figcaption>
@@ -36,7 +36,7 @@ Then, one day, you’re staring at this:
 
 Let me point out that this is already a pretty decent dashboard. Alongside the usual metrics, it captures ongoing events such as the start of a campaign or a new deployment thus giving you valuable context for what was happening in the system that may have caused the incident.
 
-The dashboard however doesn't tell us which explanation to favor: Did the deployment introduce a regression? Or is this simply what the system would look like at this level of traffic?
+The dashboard however doesn't tell us which explanation to favor: Did the deployment introduce a regression? Or is this simply what the system would look like at this level of traffic that the campaign brought in?
 
 Here's another deployment without the regression while keeping everything else unchanged.
 <figure id="incident-without-regression" style="text-align: center">
@@ -44,7 +44,9 @@ Here's another deployment without the regression while keeping everything else u
   <figcaption style="font-size: 15px">Fig. 3: Campaign and deployment without a regression</figcaption>
 </figure>
 
-Once again, there's the same spike in traffic. Latency also shifted though not nearly as much as before. The campaign and deployment took place just as they did in the previous incident. Yet this time, the deployment has no regression. This already gives you some clue about the relationships, but remember: in production, we don't get to simply flip the toggles and observe what happens.
+Once again, there's the same spike in traffic. Latency also shifted though not nearly as much as before. The campaign and deployment took place just as they did in the previous incident. Yet this time, we controlled the deployment to not have a regression.
+
+This dashboard likely already gives you some clue about the plausible relationships among various metrics, but remember: in production, we don't get to simply flip the toggles and observe what happens.
 
 So how does one tell them apart? In the first incident, you'd want to investigate the deployment. In the second incident, you could've safely ignored the deployment and looked elsewhere.
 
@@ -75,9 +77,9 @@ Let's now look at what DoWhy has to say about the two incidents. We'll use the [
 
 > **Distribution Change** explains why a target variable changed between two datasets by attributing that change back to the causal mechanisms in the graph that contributed to it.
 
-It attributes the change in a variable (e.g., latency) back to the nodes in the causal graph that may have caused it to change, and also quantify how much of the change each one was responsible for.
+It attributes the change in a variable (e.g., latency) back to the nodes in the causal graph that may have caused it, and quantifies how much of the change each one was responsible for.
 
-The following summarizes the distribution change DoWhy predicts for Fig. 2. Notice that it doesn't attribute the change to a single root cause.
+The following summarizes the distribution change DoWhy predicts for Fig. 2. Notice that it hasn't singled out a single root cause.
 
 <figure style="text-align: center">
   <img src="/posts/regressionattr.png" alt="Attribution of the latency change in the incident with a regression">
@@ -93,7 +95,7 @@ CPU usage increased in both cases, but it was never the root cause: adding capac
   <figcaption style="font-size: 15px">Fig. 5: Latency change attribution for <a href="#incident-without-regression">Fig. 3</a></figcaption>
 </figure>
 
-Apart from that, DoWhy also provides what causal ML calls intervention. Knowing the root causes is great, but engineers ultimately need to fix the situation. Intervention helps us answer "what-if" kinds of questions. For example, "what-if we vertically scaled the service and reduced CPU utilization, how much would we expect latency to improve?". Now that's valuable!
+Apart from that, DoWhy also provides what causal ML calls intervention. Knowing the root causes is great, but engineers ultimately need to fix the situation. Intervention helps us answer "what-if" kinds of questions. For example, "what-if we vertically scaled the service and reduced CPU utilization to X%, how much would we expect latency to improve?". Now that's valuable!
 
 #### Footguns
 
@@ -103,6 +105,7 @@ On this topic, I'd recommend reading about [Confounders, Colliders, Mediators](h
 
 That doesn't make the approach unusable. We can continuously revise the graphs as we better understand what impacts our systems, add more telemetry, and use canary deployments to give the model a baseline to compare the rollout against.
 
+You may also have a case where a node feeds itself for example, latency 
 ## Applications
 
 #### Cloud FinOps

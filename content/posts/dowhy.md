@@ -1,7 +1,7 @@
 ---
 title: "Logs, metrics, traces and still no answers"
 date: 2026-09-13T11:16:25+02:00
-draft: true
+draft: false
 ---
 
 The practice of observability within organizations hasn't changed much: anticipate possible failures, monitor the signals, and wire up alerts. The usual suspects: RUM, RED, USE, HTTPxx codes, latency percentiles, RPS, CPU %, memory usage, the load avg trifecta [1m/5m/15m].

@@ -34,9 +34,7 @@ Then, one day, you’re staring at this:
   <figcaption style="font-size: 15px">Fig. 2: Campaign and deployment with a regression</figcaption>
 </figure>
 
-Let me point out that this is already a pretty decent dashboard. Alongside the usual metrics, it captures ongoing events such as the start of a campaign or a new deployment thus giving you valuable context for what was happening in the system that may have caused the incident.
-
-The dashboard however doesn't tell us which explanation to favor: Did the deployment introduce a regression? Or is this simply what the system would look like at this level of traffic that the campaign brought in?
+The dashboard gives us a lot of context about what changed, but it still doesn't tell us which explanation to favor: Did the deployment introduce a regression? Or is this simply what the system would look like at this level of traffic that the campaign brought in?
 
 Here's another deployment without the regression while keeping everything else unchanged.
 <figure id="incident-without-regression" style="text-align: center">
@@ -114,11 +112,11 @@ graph LR
 
 #### Footguns
 
-Causal ML is still a tool and the literature is clear about the possibility of surprising or misleading results if you aren't being careful. Going back to our example, imagine the deployment never had a regression, but there was a hidden factor affecting CPU usage (e.g., power saver mode) that wasn't modelled in our graph. It would still end up attributing the latency effects back to the deployment.
+Causal ML is still a tool and the literature is clear about the possibility of misleading results when the graph or data are insufficient. Imagine the deployment never had a regression, but there was an unknown factor affecting CPU usage that wasn't modelled in our graph. If the data doesn't contain enough variation to distinguish that factor from the deployment, DoWhy might attribute the latency effects back to the deployment.
+
+That doesn't make the approach unusable. We can continuously revise the graphs as we better understand what impacts our systems, add more telemetry, and use canary deployments to produce useful variation & comparison groups (control/treatment).
 
 On this topic, I'd recommend reading about [Confounders, Colliders, Mediators](https://medium.com/causality-in-data-science/confounding-colliding-d-separation-and-sleeping-with-shoes-on-8ba43c976354).
-
-That doesn't make the approach unusable. We can continuously revise the graphs as we better understand what impacts our systems, add more telemetry, and use canary deployments to give the model a baseline to compare the rollout against.
 
 ## Applications
 

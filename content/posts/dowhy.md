@@ -146,6 +146,8 @@ This demo was deliberately small and used synthetic data. Applying it to product
 
 I hope this has intrigued you enough to question whether our current approach to observability is really state-of-the-art. Surely, what we need isn't yet another time-series database.
 
+If you don't want to set all of this up yourself, Datadog offers a similar [RCA](https://docs.datadoghq.com/watchdog/rca/) capability, though I haven't tested it. That said, it's still worth understanding the underlying ideas, since their applications go well beyond observability.
+
 Here are some books you can follow up on:
 - [Causal Inference and Discovery in Python](https://www.oreilly.com/library/view/causal-inference-and/9781804612989/)
 - [The Book of Why](https://www.goodreads.com/en/book/show/36204378-the-book-of-why)

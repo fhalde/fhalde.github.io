@@ -23,7 +23,7 @@ An incremental engine however is long running. You submit the query once. So whe
 
 This behavior in my opinion is consistent as far as SQL is concerned. The expectation that the window should move has nothing to do with SQL. In batch processing, the repeated schedule implicitly re-evaluates `NOW()` on every run. In other words, part of the users intent lives outside of the SQL statement itself – in the orchestration layer around it.
 
-For e.g., imagine your database rows are partitioned into three distinct zones:
+For example, imagine your database rows are partitioned into three distinct zones:
 
 - **middle**: `row.ts` between `now` and `now - 7 days`
 - **left**: `row.ts < now - 7 days`

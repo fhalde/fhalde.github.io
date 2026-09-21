@@ -108,16 +108,6 @@ That doesn't make the approach unusable. We can continuously revise the graphs a
 
 On this topic, I'd recommend reading about [Confounders, Colliders, Mediators](https://medium.com/causality-in-data-science/confounding-colliding-d-separation-and-sleeping-with-shoes-on-8ba43c976354).
 
-You may also encounter situations where a node influences itself at a later point in time e.g, in the case of retry storms. This introduces a cycle, which DAGs disallow. One way around this is to unroll the DAG across a few timesteps (at-least that's what the documentation suggests).
-
-```mermaid
-graph LR
-    L0["Latency[now]"] --> R1["Retries[now+5m]"]
-    R1 --> T1["Traffic[now+5m]"]
-    T1 --> L1["Latency[now+5m]"]
-    L1 --> R2["Retries[now+10m]"]
-```
-
 ## Applications
 
 #### Cloud FinOps

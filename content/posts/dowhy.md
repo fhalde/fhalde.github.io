@@ -124,7 +124,7 @@ This one has been particularly painful & seems like a good fit for causal attrib
 
 In our example, the same latency alert can have two different action items: investigate a release or accommodate more traffic. Rolling back a healthy deployment won't make the campaign go away. Adding capacity might help, but you're paying for the regression.
 
-Causal attribution could help choose the right action.
+Causal attribution could help automations choose the right action.
 
 #### Manageable on-calls and better postmortems
 

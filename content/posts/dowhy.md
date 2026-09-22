@@ -10,11 +10,13 @@ Yet, despite this vast amount of telemetry – an average enterprise produces te
 
 [^observability-crisis]: [The Observability Cost Crisis](https://www.practicallogix.com/the-observability-cost-crisis-why-84-of-enterprises-are-drowning-in-telemetry-and-how-opentelemetry-is-forcing-a-reckoning)
 
-The issue, as I see it, is that we never directly observe cause and effect in our telemetry. If we put them on a dashboard, all we really see are correlations among the signals. It also doesn't help that, in production, "too many" things happen at once. A marketing campaign might cause a surge in traffic exactly when a new deployment introduced a regression. What caused the latency spike?
+The issue, as I see it, is that we never directly observe cause and effect in our telemetry. If we plot them on a dashboard, we often see correlations among the signals. It also doesn't help that, in production, "too many" things happen at once. A marketing campaign might cause a surge in traffic exactly when a new deployment introduced a regression. What caused the latency spike?
 
-Engineers then carefully reason over the metrics and piece together a Root Cause Analysis (RCA). While I get the appeal of playing "detective", it is generally error prone. Surely machines know how to learn by now?
+Good alerts and playbooks can quickly tell us something is wrong and help stop the incident. But they don't necessarily tell us why it happened. A playbook might mitigate the symptom without addressing the cause, making it likely for the incident to reappear.
 
-## Can we do better?
+Engineers carefully reason over the metrics and piece together a Root Cause Analysis (RCA). While I get the appeal of playing “detective”, it is generally error prone. Can we automate what our brains have been implicitly doing?
+
+## Causal Machine Learning
 
 While looking for a better way to reason about incidents, I came across [Causal Machine Learning](https://medium.com/causality-in-data-science/why-machine-learning-needs-causality-3d33e512cd37) which looked promising, and to my luck, some good folks at Microsoft and AWS have already done much of the heavy lifting in a library called [DoWhy](https://www.pywhy.org/dowhy/v0.10.1/index.html). The documentation does an excellent job of showcasing practical applications of causal modeling.
 

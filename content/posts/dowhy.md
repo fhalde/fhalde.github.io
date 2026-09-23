@@ -106,7 +106,7 @@ Apart from that, DoWhy also provides what causal ML calls **intervention**. Know
 
 Causal ML is still a tool and the literature is clear about the possibility of misleading results when the graph or data are insufficient. Imagine the deployment never had a regression, but there was an unknown factor affecting CPU usage that wasn't modelled in our graph. If the data doesn't contain enough variation to distinguish that factor from the deployment, DoWhy might attribute the latency effects back to the deployment.
 
-That doesn't make the approach unusable. We can continuously revise the graphs as we better understand what impacts our systems, add more telemetry, and use canary deployments to produce useful variation & comparison groups (control/treatment).
+That doesn't make the approach unusable. Luckily production has enough chaos. We can also continuously revise the graphs as we better understand what impacts our systems, add more telemetry, and use canary deployments to produce useful variation & comparison groups (control/treatment).
 
 On this topic, I'd recommend reading about [Confounders, Colliders, Mediators](https://medium.com/causality-in-data-science/confounding-colliding-d-separation-and-sleeping-with-shoes-on-8ba43c976354).
 

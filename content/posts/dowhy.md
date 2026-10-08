@@ -88,14 +88,16 @@ The following summarizes the distribution change DoWhy predicts for Fig. 2. Noti
 
 We know from Fig. 2 that our **mean latency** increased by roughly 100ms. The model attributes about 67ms to the deployment and 34ms to the campaign.
 
-What happens when the deployment introduces no regression? Here's the attribution for the second experiment, Fig. 3.
+Well, at this point, it feels like I'm just throwing random numbers at you and saying, "Trust me, bro."
+
+Let's see what happens when the deployment introduces no regression? Here's the attribution for the second experiment, Fig. 3.
 
 <figure style="text-align: center">
   <img src="/posts/noregressionattr.png" alt="Attribution of the latency change in the incident without a regression">
   <figcaption style="font-size: 15px">Fig. 5: Latency change attribution for <a href="#incident-without-regression">Fig. 3</a></figcaption>
 </figure>
 
-The campaign contributes roughly 34ms in both experiments. The deployment adds about 67ms in the first, but almost nothing in the second.
+Since we designed this experiment so that the campaign was the only influential event, the shift in mean latency matches the campaign's attributed impact exactly. This also suggests that the remaining 66ms observed in the previous experiment must be attributable to the deployment.
 
 CPU usage increased in both cases, but it was never the root cause: adding capacity might have relieved the symptom, but
 fixing the regression is what would have resolved the underlying problem.

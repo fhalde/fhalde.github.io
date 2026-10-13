@@ -4,140 +4,27 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Life</title>
+<link rel="stylesheet" href="../tools/theme.css">
 <style>
-  :root{
-    --paper:      #efe7d5;   /* 宣纸 rice paper */
-    --paper-2:    #e6dcc4;   /* subtle panel */
-    --ink:        #23211c;   /* 墨 ink */
-    --ink-soft:   #4a463d;
-    --line:       #b9ac8f;   /* grid lines */
-    --vermilion:  #a52a24;   /* 朱砂 cinnabar */
-    --vermilion-2:#c1443a;
-    --celadon:    #6d8a72;   /* 青 celadon */
-    --ochre:      #8a6d3b;   /* 赭石 ochre */
-  }
-  *{ box-sizing:border-box; }
-  html,body{ height:100%; }
-  body{
-    margin:0;
-    background:
-      radial-gradient(circle at 20% 15%, rgba(255,255,255,.35), transparent 40%),
-      radial-gradient(circle at 85% 80%, rgba(138,109,59,.10), transparent 45%),
-      var(--paper);
-    color:var(--ink);
-    font-family:Georgia, "Times New Roman", "Iowan Old Style", serif;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    min-height:100%;
-    padding:32px 16px 48px;
-    gap:20px;
-  }
-  header{ text-align:center; }
-  h1{
-    margin:0;
-    font-size:34px;
-    letter-spacing:.35em;
-    font-weight:600;
-  }
-  .sub{
-    margin-top:6px;
-    font-size:12px;
-    letter-spacing:.45em;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-  }
-  .stage{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:16px;
-  }
-  .board{
-    position:relative;
-    padding:14px;
-    background:var(--paper-2);
-    border:1px solid var(--line);
-    box-shadow:0 1px 0 rgba(255,255,255,.5) inset, 0 6px 22px rgba(35,33,28,.10);
-  }
-  canvas{ display:block; }
-  .banner{
-    position:absolute;
-    inset:14px;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    background:rgba(239,231,213,.82);
-    backdrop-filter:blur(1px);
-    pointer-events:none;
-  }
-  .banner .seal{
-    background:var(--vermilion);
-    color:var(--paper);
-    padding:18px 22px;
-    font-size:30px;
-    letter-spacing:.3em;
-    border:2px solid #7d201b;
-    box-shadow:0 4px 16px rgba(120,30,25,.35);
-    text-align:center;
-  }
-  .banner .seal small{
-    display:block;
-    font-size:11px;
-    letter-spacing:.4em;
-    margin-top:8px;
-    opacity:.9;
-  }
-  .panel{
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-    max-width:520px;
-  }
-  .stat{
-    display:flex;
-    gap:18px;
-    font-size:14px;
-    letter-spacing:.1em;
-    color:var(--ink-soft);
-  }
-  .stat b{ color:var(--ink); font-weight:600; }
-  .divider{
-    width:100%;
-    height:1px;
-    background:var(--line);
-    opacity:.7;
-  }
-  button{
-    font-family:inherit;
-    font-size:15px;
-    color:var(--ink);
-    background:var(--paper);
-    border:1px solid var(--ink-soft);
-    border-radius:0;               /* square, per request */
-    padding:8px 14px;
-    cursor:pointer;
-    letter-spacing:.15em;
-    transition:background .12s ease, color .12s ease;
-  }
-  button:hover{ background:var(--ink); color:var(--paper); }
-  button.active{ background:var(--vermilion); color:var(--paper); border-color:#7d201b; }
-  .diff{ display:flex; gap:8px; }
-  .hint{
-    font-size:12px;
-    letter-spacing:.08em;
-    color:var(--ink-soft);
-    text-align:center;
-    max-width:460px;
-    line-height:1.7;
-  }
+  header { margin-bottom: 12px; }
+  .sub { color: #555; }
+  .stage { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .board { position: relative; max-width: 100%; overflow: auto; border: 1px solid #ccc; }
+  canvas { display: block; }
+  .banner { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(255,255,255,.85); pointer-events: none; }
+  .seal { padding: 12px; background: #fff; border: 1px solid #999; font-size: 18px; text-align: center; }
+  .seal small { display: block; font-size: 11px; margin-top: 4px; }
+  .panel, .diff, .stat { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .stat { gap: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .divider { width: 100%; height: 1px; background: #ccc; }
+  button.active { background: #eee; font-weight: 600; }
+  .hint { color: #555; }
 </style>
 </head>
-<body>
+<body class="plain-tool">
+  <nav class="tool-nav" aria-label="Navigation"><a href="../tools/">← Tools</a></nav>
   <header>
-    <h1>LIFE</h1>
+    <h1>Life</h1>
     <div class="sub">cross the living field</div>
   </header>
 

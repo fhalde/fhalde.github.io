@@ -46,3 +46,7 @@ link = "/posts/metadata"
 [[params.socials]]
 name = "GITHUB"
 link = "https://github.com/fhalde"
+
+[[params.socials]]
+name = "TOOLS"
+link = "/tools/"

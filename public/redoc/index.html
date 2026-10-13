@@ -5,274 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>API Schema → Redoc</title>
   <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <link rel="stylesheet" href="../tools/theme.css">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: #0f1117;
-      color: #e1e4e8;
-      min-height: 100vh;
+    * { box-sizing: border-box; }
+    #input-view { display: flex; flex-direction: column; gap: 8px; }
+    #input-view h1 { margin: 0; font-size: 18px; }
+    .subtitle { margin: 0; color: #555; }
+    .input-card { width: 100%; }
+    .detected-format { min-height: 18px; margin: 6px 0; color: #555; }
+    .input-label { display: block; margin: 12px 0 2px; color: #555; font-size: 11px; }
+    #crd-input {
+      display: block; width: 100%; height: 60vh; min-height: 240px;
+      padding: 8px; border: 1px solid #999; border-radius: 3px;
+      background: #fff; color: #111; resize: vertical;
+      font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      tab-size: 2;
     }
-
-    /* ── Input View ─────────────────────────────────────── */
-    #input-view {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 2rem;
-      animation: fadeIn .3s ease;
+    .btn-row, .sample-group, .toolbar-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .btn-row { margin-top: 8px; padding-top: 8px; border-top: 1px solid #ccc; }
+    .sample-group { margin-right: auto; }
+    .btn-row button, .redoc-toolbar button, .redoc-toolbar select {
+      min-height: 26px; padding: 2px 6px; border: 1px solid #999;
+      border-radius: 3px; background: #fff; color: #111; font: inherit;
     }
-
-    #input-view h1 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-bottom: .35rem;
-      background: linear-gradient(135deg, #58a6ff, #a371f7);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    #input-view p.subtitle {
-      color: #8b949e;
-      font-size: .95rem;
-      margin-bottom: 1.5rem;
-      text-align: center;
-      max-width: 560px;
-      line-height: 1.5;
-    }
-
-    .format-badges {
-      display: flex;
-      gap: .5rem;
-      margin-bottom: 1.25rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .format-badge {
-      font-size: .75rem;
-      font-weight: 600;
-      padding: .3rem .7rem;
-      border-radius: 20px;
-      border: 1px solid #30363d;
-      background: #161b22;
-      color: #8b949e;
-    }
-    .format-badge.swagger  { color: #85e89d; border-color: rgba(133,232,157,.3); }
-    .format-badge.jsonschema { color: #d2a8ff; border-color: rgba(210,168,255,.3); }
-    .format-badge.crd      { color: #79c0ff; border-color: rgba(121,192,255,.3); }
-
-    .input-card {
-      width: 100%;
-      max-width: 720px;
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 8px 32px rgba(0,0,0,.4);
-    }
-
-    .detected-format {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      margin-bottom: .75rem;
-      font-size: .8rem;
-      color: #8b949e;
-      min-height: 1.4rem;
-    }
-    .detected-format .badge {
-      font-weight: 600;
-      padding: .15rem .5rem;
-      border-radius: 4px;
-      font-size: .75rem;
-    }
-    .detected-format .badge.swagger   { background: rgba(133,232,157,.15); color: #85e89d; }
-    .detected-format .badge.openapi   { background: rgba(133,232,157,.15); color: #85e89d; }
-    .detected-format .badge.jsonschema { background: rgba(210,168,255,.15); color: #d2a8ff; }
-    .detected-format .badge.crd       { background: rgba(121,192,255,.15); color: #79c0ff; }
-    .detected-format .badge.unknown   { background: rgba(139,148,158,.15); color: #8b949e; }
-
-    textarea {
-      width: 100%;
-      height: 400px;
-      background: #0d1117;
-      color: #c9d1d9;
-      border: 1px solid #30363d;
-      border-radius: 8px;
-      padding: 1rem;
-      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-      font-size: .85rem;
-      line-height: 1.5;
-      resize: vertical;
-      outline: none;
-      transition: border-color .2s;
-    }
-
-    textarea:focus {
-      border-color: #58a6ff;
-    }
-
-    textarea::placeholder {
-      color: #484f58;
-    }
-
-    .btn-row {
-      display: flex;
-      justify-content: flex-end;
-      gap: .75rem;
-      margin-top: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .btn-row .sample-group {
-      display: flex;
-      gap: .5rem;
-      margin-right: auto;
-      flex-wrap: wrap;
-    }
-
-    button {
-      padding: .6rem 1.4rem;
-      border: none;
-      border-radius: 8px;
-      font-size: .9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all .15s ease;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #238636, #2ea043);
-      color: #fff;
-    }
-    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
-    .btn-primary:active { transform: translateY(0); }
-
-    .btn-secondary {
-      background: #21262d;
-      color: #c9d1d9;
-      border: 1px solid #30363d;
-    }
-    .btn-secondary:hover { background: #30363d; }
-
-    .btn-sample {
-      background: transparent;
-      font-size: .8rem;
-      padding: .45rem 1rem;
-      border: 1px solid;
-    }
-    .btn-sample.crd       { color: #79c0ff; border-color: rgba(121,192,255,.4); }
-    .btn-sample.crd:hover { background: rgba(121,192,255,.1); }
-    .btn-sample.swagger       { color: #85e89d; border-color: rgba(133,232,157,.4); }
-    .btn-sample.swagger:hover { background: rgba(133,232,157,.1); }
-    .btn-sample.jsonschema       { color: #d2a8ff; border-color: rgba(210,168,255,.4); }
-    .btn-sample.jsonschema:hover { background: rgba(210,168,255,.1); }
-
-    .error-msg {
-      color: #f85149;
-      background: rgba(248,81,73,.1);
-      border: 1px solid rgba(248,81,73,.25);
-      border-radius: 8px;
-      padding: .75rem 1rem;
-      margin-top: .75rem;
-      font-size: .85rem;
-      display: none;
-    }
-
-    /* ── Redoc View ─────────────────────────────────────── */
-    #redoc-view {
-      display: none;
-    }
-
-    .redoc-toolbar {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      background: #161b22;
-      border-bottom: 1px solid #30363d;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: .6rem 1.5rem;
-    }
-
-    .redoc-toolbar .title {
-      font-size: .95rem;
-      font-weight: 600;
-      color: #c9d1d9;
-    }
-
-    .redoc-toolbar .kind-badge {
-      background: rgba(88,166,255,.15);
-      color: #58a6ff;
-      padding: .2rem .6rem;
-      border-radius: 4px;
-      font-size: .8rem;
-      font-weight: 500;
-      margin-left: .5rem;
-    }
-
-    #redoc-container {
-      background: #fff;
-    }
-
-    /* ── Animations ──────────────────────────────────────── */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── Loading spinner ────────────────────────────────── */
-    .spinner {
-      display: none;
-      width: 20px;
-      height: 20px;
-      border: 2.5px solid rgba(255,255,255,.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .6s linear infinite;
-      margin-right: .5rem;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .btn-primary .spinner { display: none; }
-    .btn-primary.loading .spinner { display: inline-block; }
-    .btn-primary.loading { pointer-events: none; opacity: .7; }
+    .btn-row button, .redoc-toolbar button { cursor: pointer; }
+    button:disabled { opacity: .45; cursor: default; }
+    #generate-btn { font-weight: 600; }
+    #crd-input:focus-visible, button:focus-visible, select:focus-visible { outline: 2px solid #555; outline-offset: 2px; }
+    .error-msg { display: none; margin-top: 8px; color: #a00; white-space: pre-wrap; overflow-wrap: anywhere; }
+    #redoc-view { display: none; }
+    .redoc-toolbar { position: sticky; top: 0; z-index: 1000; background: #fff; padding: 8px 0; border-bottom: 1px solid #ccc; }
+    .redoc-toolbar .title { font-weight: 600; }
+    .kind-badge, #bundle-note { color: #555; }
+    #document-select { max-width: 100%; }
+    #bundle-note { margin-top: 4px; }
+    [hidden] { display: none !important; }
   </style>
 </head>
 <body>
+<nav class="tool-nav" aria-label="Navigation"><a href="../tools/">← Tools</a></nav>
 
 <!-- ── INPUT VIEW ──────────────────────────────────────── -->
 <div id="input-view">
   <h1>Schema → API Docs</h1>
-  <p class="subtitle">Paste a Swagger/OpenAPI spec, JSON Schema, or Kubernetes CRD to generate interactive API documentation</p>
-
-  <div class="format-badges">
-    <span class="format-badge swagger">Swagger / OpenAPI</span>
-    <span class="format-badge jsonschema">JSON Schema</span>
-    <span class="format-badge crd">K8s CRD</span>
-  </div>
+  <p class="subtitle">Paste a complete OpenAPI / Swagger spec, JSON Schema, or Kubernetes CRD. YAML, JSON, code fences, and multi-document bundles work here.</p>
 
   <div class="input-card">
-    <div class="detected-format" id="detected-format">
+    <div class="detected-format" id="detected-format" role="status">
       <!-- filled dynamically -->
     </div>
+    <label class="input-label" for="crd-input">Spec or schema</label>
     <textarea id="crd-input" spellcheck="false"
       placeholder="# Paste YAML or JSON here…&#10;#&#10;# Supported formats:&#10;#   • Swagger 2.0 / OpenAPI 3.x spec (YAML or JSON)&#10;#   • JSON Schema (YAML or JSON)&#10;#   • Kubernetes CRD YAML&#10;#&#10;# The format is auto-detected."></textarea>
-    <div id="error-box" class="error-msg"></div>
+    <div id="error-box" class="error-msg" role="alert"></div>
     <div class="btn-row">
       <div class="sample-group">
         <button class="btn-sample swagger" onclick="loadSample('swagger')">Swagger Sample</button>
         <button class="btn-sample jsonschema" onclick="loadSample('jsonschema')">JSON Schema Sample</button>
         <button class="btn-sample crd" onclick="loadSample('crd')">CRD Sample</button>
       </div>
-      <button class="btn-secondary" onclick="document.getElementById('crd-input').value=''; updateDetectedFormat('');">Clear</button>
+      <button class="btn-secondary" onclick="clearInput()">Clear</button>
       <button class="btn-primary" id="generate-btn" onclick="generate()">
-        <span class="spinner" id="spinner"></span>
         Generate Docs
       </button>
     </div>
@@ -282,12 +75,15 @@
 <!-- ── REDOC VIEW ──────────────────────────────────────── -->
 <div id="redoc-view">
   <div class="redoc-toolbar">
-    <div style="display:flex;align-items:center;">
-      <button class="btn-secondary" onclick="goBack()" style="margin-right:1rem;">← Back</button>
+    <div class="toolbar-controls">
+      <button class="btn-secondary" onclick="goBack()">← Back</button>
       <span class="title" id="toolbar-title">API Documentation</span>
       <span class="kind-badge" id="toolbar-badge"></span>
+      <label id="document-label" for="document-select" hidden>Document</label>
+      <select id="document-select" onchange="renderDocument(Number(this.value))" hidden></select>
     </div>
   </div>
+  <div id="bundle-note" role="status"></div>
   <div id="redoc-container"></div>
 </div>
 
@@ -307,9 +103,14 @@ function hideError() {
 }
 
 function goBack() {
+  renderSequence++;
+  const button = document.getElementById('generate-btn');
+  button.disabled = false;
+  button.textContent = 'Generate Docs';
   document.getElementById('redoc-view').style.display = 'none';
   document.getElementById('input-view').style.display = 'flex';
   document.getElementById('redoc-container').innerHTML = '';
+  document.getElementById('crd-input').focus();
 }
 
 // ── Format Detection ──────────────────────────────────────
@@ -336,9 +137,11 @@ function detectFormat(obj) {
   }
 
   // Kubernetes CRD
-  if (obj.kind === 'CustomResourceDefinition' || obj.apiVersion?.includes('apiextensions.k8s.io')) {
+  if (obj.kind === 'CustomResourceDefinition') {
     return 'crd';
   }
+
+  if (obj.apiVersion && obj.kind) return 'unknown';
 
   // JSON Schema – look for $schema keyword, or typical schema-like structure
   if (obj.$schema || obj.$id) {
@@ -346,7 +149,7 @@ function detectFormat(obj) {
   }
 
   // Heuristic: if it has "type" and "properties" but no "paths"/"swagger"/"openapi", likely JSON Schema
-  if (obj.type && obj.properties && !obj.paths && !obj.swagger && !obj.openapi) {
+  if (['type', 'properties', 'items', 'allOf', 'anyOf', 'oneOf', 'enum', '$ref', '$defs'].some(key => Object.hasOwn(obj, key)) && !obj.paths && !obj.swagger && !obj.openapi) {
     return 'jsonschema';
   }
 
@@ -383,21 +186,66 @@ document.getElementById('crd-input').addEventListener('input', function() {
   detectTimer = setTimeout(() => updateDetectedFormat(this.value), 300);
 });
 
+// Keep each document intact so local references cannot collide across a bundle.
+function parseInput(raw) {
+  const text = raw.trim().replace(/^\uFEFF/, '');
+  const fence = text.match(/^(`{3,}|~{3,})(?:ya?ml|json)?[^\S\n]*\r?\n([\s\S]*?)\r?\n\1$/i);
+  const source = fence ? fence[2] : text;
+  let documents;
+  try { documents = [JSON.parse(source)]; }
+  catch {
+    if (typeof jsyaml === 'undefined') throw new Error('The YAML parser could not load. Check your connection and reload, or paste JSON.');
+    try { documents = jsyaml.loadAll(source, null, { schema: jsyaml.JSON_SCHEMA }); }
+    catch (error) { throw new Error('Invalid YAML/JSON: ' + error.message); }
+  }
+  const entries = [];
+  let skipped = 0;
+  function collect(doc) {
+    if (doc == null) return;
+    if (Array.isArray(doc)) { doc.forEach(collect); return; }
+    if (typeof doc === 'object' && ['List', 'CustomResourceDefinitionList'].includes(doc.kind) && Array.isArray(doc.items)) {
+      doc.items.forEach(collect);
+      return;
+    }
+    // Also accept a schema copied with its Kubernetes wrapper.
+    const value = doc.openAPIV3Schema || doc;
+    const format = detectFormat(value);
+    if (format === 'unknown') { skipped++; return; }
+    const title = value.info?.title || value.metadata?.name || value.title || value.$id || formatLabel(format);
+    entries.push({ value, format, title: String(title) });
+  }
+  documents.forEach(collect);
+  if (!entries.length) throw new Error('No supported spec found. Paste an OpenAPI / Swagger spec, JSON Schema, or Kubernetes CustomResourceDefinition. Kubernetes resource instances do not contain their API schema.');
+  return { entries, skipped };
+}
+
+function inputSummary({ entries, skipped }) {
+  const formats = [...new Set(entries.map(entry => formatLabel(entry.format)))].join(', ');
+  return `${entries.length} document${entries.length === 1 ? '' : 's'} · ${formats}` +
+    (skipped ? ` · ${skipped} unsupported document${skipped === 1 ? '' : 's'} skipped` : '');
+}
+
 function updateDetectedFormat(raw) {
   const el = document.getElementById('detected-format');
-  if (!raw || !raw.trim()) {
-    el.innerHTML = '';
-    return;
-  }
-  try {
-    let obj;
-    try { obj = JSON.parse(raw); } catch { obj = jsyaml.load(raw); }
-    const fmt = detectFormat(obj);
-    el.innerHTML = `Detected: <span class="badge ${formatBadgeClass(fmt)}">${formatLabel(fmt)}</span>`;
-  } catch {
-    el.innerHTML = `Detected: <span class="badge unknown">Parsing…</span>`;
-  }
+  hideError();
+  if (!raw.trim()) { el.textContent = ''; return; }
+  try { el.textContent = inputSummary(parseInput(raw)); }
+  catch { el.textContent = 'Paste a complete spec, then Generate Docs.'; }
 }
+
+function clearInput() {
+  clearTimeout(detectTimer);
+  document.getElementById('crd-input').value = '';
+  updateDetectedFormat('');
+  document.getElementById('crd-input').focus();
+}
+
+document.getElementById('crd-input').addEventListener('keydown', event => {
+  if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+    event.preventDefault();
+    generate();
+  }
+});
 
 // ── JSON Schema → OpenAPI Wrapper ─────────────────────────
 
@@ -607,7 +455,7 @@ function crdToOpenAPI(crd) {
   const listKind = names.listKind || `${kind}List`;
   const scope = spec.scope || 'Namespaced';
 
-  const versions = spec.versions || [];
+  const versions = spec.versions?.length ? spec.versions : (spec.version ? [{ name: spec.version, served: true }] : []);
   if (versions.length === 0) {
     throw new Error('CRD has no versions defined under spec.versions.');
   }
@@ -629,8 +477,8 @@ function crdToOpenAPI(crd) {
     if (ver.served === false) continue;
 
     const versionName = ver.name;
-    const schema = ver.schema?.openAPIV3Schema;
-    if (!schema) continue;
+    const schema = ver.schema?.openAPIV3Schema || spec.validation?.openAPIV3Schema;
+    if (!schema) throw new Error(`CRD ${kind} (${versionName}) has no OpenAPI schema.`);
 
     const tag = `${kind} (${versionName})`;
     openapi.tags.push({
@@ -762,7 +610,7 @@ function crdToOpenAPI(crd) {
     }
 
     // Status sub-resource
-    if (ver.subresources?.status) {
+    if ((ver.subresources || spec.subresources)?.status) {
       const statusPath = scope === 'Namespaced'
         ? `/${versionName}/namespaces/{namespace}/${plural}/{name}/status`
         : `/${versionName}/${plural}/{name}/status`;
@@ -795,6 +643,7 @@ function crdToOpenAPI(crd) {
     }
   }
 
+  if (!openapi.tags.length) throw new Error('CRD has no served versions with a schema.');
   return openapi;
 }
 
@@ -830,7 +679,7 @@ function buildInfoDescription(crd) {
   const kind = names.kind;
   const plural = names.plural;
   const scope = spec.scope || 'Namespaced';
-  const versions = (spec.versions || []).filter(v => v.served !== false).map(v => v.name);
+  const versions = (spec.versions || (spec.version ? [{ name: spec.version }] : [])).filter(v => v.served !== false).map(v => v.name);
 
   let desc = `## ${kind}\n\n`;
   desc += `| Property | Value |\n|---|---|\n`;
@@ -852,126 +701,104 @@ function buildInfoDescription(crd) {
 
 // ── Main generate function ────────────────────────────────
 
+let activeBundle = null;
+let renderSequence = 0;
+
 async function generate() {
+  clearTimeout(detectTimer);
   hideError();
-  const raw = document.getElementById('crd-input').value.trim();
-
-  if (!raw) {
-    showError('Please paste a spec or schema first.');
-    return;
-  }
-
-  const btn = document.getElementById('generate-btn');
-  btn.classList.add('loading');
-
+  const raw = document.getElementById('crd-input').value;
+  if (!raw.trim()) { showError('Please paste a spec or schema first.'); return; }
   try {
-    // Parse YAML or JSON
-    let parsed;
-    try {
-      // Try JSON first (faster), fall back to YAML
-      try { parsed = JSON.parse(raw); } catch { parsed = jsyaml.load(raw); }
-    } catch (e) {
-      throw new Error('Invalid YAML/JSON: ' + e.message);
-    }
+    activeBundle = parseInput(raw);
+    const select = document.getElementById('document-select');
+    select.replaceChildren();
+    activeBundle.entries.forEach((entry, index) => {
+      const option = document.createElement('option');
+      option.value = index;
+      option.textContent = `${index + 1}. ${entry.title}`;
+      select.appendChild(option);
+    });
+    select.hidden = activeBundle.entries.length < 2;
+    document.getElementById('document-label').hidden = select.hidden;
+    document.getElementById('bundle-note').textContent =
+      activeBundle.entries.length > 1 || activeBundle.skipped ? inputSummary(activeBundle) : '';
+    await renderDocument(0);
+  } catch (error) { showError(error.message); }
+}
 
-    // Detect format
-    const format = detectFormat(parsed);
-    let openapiSpec;
-    let toolbarTitle = 'API Documentation';
-    let toolbarBadge = '';
-
-    switch (format) {
-      case 'openapi3':
-        // Already an OpenAPI 3.x spec — pass directly to Redoc
-        openapiSpec = parsed;
-        toolbarTitle = parsed.info?.title || 'OpenAPI Documentation';
-        toolbarBadge = `OpenAPI ${parsed.openapi}`;
-        break;
-
-      case 'swagger2':
-        // Swagger 2.0 — Redoc can handle it natively
-        openapiSpec = parsed;
-        toolbarTitle = parsed.info?.title || 'Swagger Documentation';
-        toolbarBadge = 'Swagger 2.0';
-        break;
-
-      case 'crd':
-        // Kubernetes CRD — convert to OpenAPI
-        openapiSpec = crdToOpenAPI(parsed);
-        toolbarTitle = `${parsed.spec?.names?.kind || 'CRD'} API Documentation`;
-        toolbarBadge = parsed.spec?.group || 'CRD';
-        break;
-
-      case 'jsonschema':
-        // JSON Schema — wrap in OpenAPI
-        openapiSpec = jsonSchemaToOpenAPI(parsed);
-        toolbarTitle = `${parsed.title || 'Schema'} Documentation`;
-        toolbarBadge = 'JSON Schema';
-        break;
-
-      default:
-        throw new Error(
-          'Could not detect the format. Supported formats:\n' +
-          '• Swagger 2.0 / OpenAPI 3.x spec\n' +
-          '• JSON Schema\n' +
-          '• Kubernetes CRD YAML'
-        );
-    }
-
-    // Switch views
+async function renderDocument(index) {
+  const sequence = ++renderSequence;
+  const btn = document.getElementById('generate-btn');
+  btn.disabled = true;
+  btn.textContent = 'Loading…';
+  hideError();
+  try {
+    const { value, format, title } = activeBundle.entries[index];
+    const openapiSpec = format === 'crd' ? crdToOpenAPI(value)
+      : format === 'jsonschema' ? jsonSchemaToOpenAPI(value) : value;
     document.getElementById('input-view').style.display = 'none';
-    const redocView = document.getElementById('redoc-view');
-    redocView.style.display = 'block';
-
-    document.getElementById('toolbar-title').textContent = toolbarTitle;
-    document.getElementById('toolbar-badge').textContent = toolbarBadge;
-
-    // Render Redoc
-    const container = document.getElementById('redoc-container');
-    container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:60vh;color:#666;font-size:1.1rem;">Loading Redoc…</div>';
-
+    document.getElementById('redoc-view').style.display = 'block';
+    document.getElementById('toolbar-title').textContent = title;
+    document.getElementById('toolbar-badge').textContent = formatLabel(format);
+    document.getElementById('document-select').value = index;
+    // A separate mount keeps a slow previous render from overwriting this one.
+    const mount = document.createElement('div');
+    mount.textContent = 'Loading Redoc…';
+    document.getElementById('redoc-container').replaceChildren(mount);
     await loadRedoc();
-
-    Redoc.init(openapiSpec, {
-      theme: {
-        colors: { primary: { main: '#58a6ff' } },
-        typography: {
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-          headings: { fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' },
-        },
-        sidebar: { backgroundColor: '#f6f8fa' },
-        rightPanel: { backgroundColor: '#1e2128' },
-      },
-      scrollYOffset: 50,
-      hideDownloadButton: false,
-      expandResponses: '200,201',
-      jsonSampleExpandLevel: 3,
-      sortOperationsAlphabetically: false,
-      sortTagsAlphabetically: false,
-    }, container);
-
-  } catch (err) {
-    showError(err.message);
-    document.getElementById('input-view').style.display = 'flex';
-    document.getElementById('redoc-view').style.display = 'none';
+    if (sequence !== renderSequence) return;
+    await new Promise((resolve, reject) => {
+      Redoc.init(openapiSpec, {
+        scrollYOffset: () => document.querySelector('.redoc-toolbar').offsetHeight,
+      }, mount, error => error ? reject(error) : resolve());
+    });
+  } catch (error) {
+    if (sequence !== renderSequence) return;
+    if (activeBundle.entries.length > 1) {
+      document.getElementById('input-view').style.display = 'none';
+      document.getElementById('redoc-view').style.display = 'block';
+      document.getElementById('toolbar-title').textContent = activeBundle.entries[index].title;
+      document.getElementById('toolbar-badge').textContent = formatLabel(activeBundle.entries[index].format);
+      document.getElementById('document-select').value = index;
+      const message = document.createElement('p');
+      message.setAttribute('role', 'alert');
+      message.textContent = 'Could not render this document: ' + error.message + ' Choose another document or go back to edit.';
+      document.getElementById('redoc-container').replaceChildren(message);
+    } else {
+      document.getElementById('input-view').style.display = 'flex';
+      document.getElementById('redoc-view').style.display = 'none';
+      showError('Could not render this document: ' + error.message);
+    }
   } finally {
-    btn.classList.remove('loading');
+    if (sequence === renderSequence || document.getElementById('redoc-view').style.display === 'none') {
+      btn.disabled = false;
+      btn.textContent = 'Generate Docs';
+    }
   }
 }
 
 // ── Lazy-load Redoc standalone bundle ─────────────────────
 
-let redocLoaded = false;
-
+let redocPromise;
 function loadRedoc() {
-  if (redocLoaded) return Promise.resolve();
-  return new Promise((resolve, reject) => {
+  if (window.Redoc) return Promise.resolve();
+  if (redocPromise) return redocPromise;
+  redocPromise = new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = 'https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js';
-    script.onload = () => { redocLoaded = true; resolve(); };
-    script.onerror = () => reject(new Error('Failed to load Redoc. Check your internet connection.'));
+    script.onload = () => {
+      if (window.Redoc) resolve();
+      else { redocPromise = null; script.remove(); reject(new Error('Redoc did not initialize. Please try again.')); }
+    };
+    script.onerror = () => {
+      redocPromise = null;
+      script.remove();
+      reject(new Error('Failed to load Redoc. Check your internet connection and try again.'));
+    };
     document.head.appendChild(script);
   });
+  return redocPromise;
 }
 
 // ── Sample Data ───────────────────────────────────────────

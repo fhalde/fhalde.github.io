@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anonymity My A**</title>
+  <link rel="stylesheet" href="../tools/theme.css">
+  <style>
+    main { max-width: 1100px; }
+    .workspace { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+    section { min-width: 0; }
+    .section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid #ccc; padding-bottom: 8px; }
+    .section-heading h2 { margin: 0; }
+    .author { margin: 0 0 12px; padding: 0 0 12px; border-bottom: 1px solid #ccc; }
+    .author-heading { display: flex; align-items: end; gap: 8px; margin-bottom: 8px; }
+    .author-name { flex: 1; min-width: 0; }
+    .author-name input { width: 100%; }
+    .snippet { margin-bottom: 8px; }
+    .snippet-heading { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+    .snippet-heading button { border: 0; padding: 0; color: #555; font-size: 11px; min-height: 22px; }
+    .snippet textarea { display: block; min-height: 90px; }
+    #sample { min-height: 180px; margin-bottom: 8px; }
+    #error { color: #a00; margin: 8px 0; }
+    #results { margin-top: 20px; }
+    .result { display: grid; grid-template-columns: minmax(80px, 1fr) 2fr 60px; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .result-name { overflow-wrap: anywhere; }
+    .bar { height: 8px; background: #eee; }
+    .bar span { display: block; height: 100%; background: #555; }
+    .percentage { text-align: right; font-variant-numeric: tabular-nums; }
+    #evidence { margin-top: 12px; }
+    @media (max-width: 650px) { .workspace { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="plain-tool">
+  <nav class="tool-nav" aria-label="Navigation"><a href="../tools/">← Tools</a></nav>
+  <main>
+    <h1>Anonymity My A**</h1>
+    <p class="muted">Paste writing from a few authors. Give it a mystery text. See whose words fit.</p>
+    <p class="muted">Everything runs in this tab. Text is not uploaded or saved.</p>
+    <div class="workspace">
+      <section aria-labelledby="authors-heading">
+        <div class="section-heading"><h2 id="authors-heading">1. Authors</h2><button id="add-author" type="button">+ Add author</button></div>
+        <div id="authors"></div>
+      </section>
+      <section aria-labelledby="sample-heading">
+        <div class="section-heading"><h2 id="sample-heading">2. Mystery text</h2></div>
+        <form id="prediction-form">
+          <label for="sample">Sample to classify</label>
+          <textarea id="sample" placeholder="Paste the text whose author you want to guess…" spellcheck="false"></textarea>
+          <div class="actions"><button type="submit">Predict author</button><span class="muted">Words + word pairs · Naive Bayes</span></div>
+        </form>
+        <p id="error" role="alert" hidden></p>
+        <div id="results" aria-live="polite" hidden>
+          <h2 id="result-title">Model probabilities</h2>
+          <div id="ranking"></div>
+          <p id="evidence" class="muted"></p>
+          <p class="muted">Relative to these authors only. These are model estimates, not proof of authorship; Naive Bayes can be overconfident.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="app.mjs"></script>
+</body>
+</html>
